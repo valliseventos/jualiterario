@@ -283,11 +283,6 @@
       ctx.fillStyle = '#cb2239';
       ctx.fillRect(100, 830, total ? (count / total) * 880 : 0, 14);
 
-      ctx.fillStyle = '#5e5b58';
-      ctx.font = '400 21px Arial, sans-serif';
-      var lastNames = visits.map(function (visit) { return visit.name.slice(0, 18); }).join('  ·  ');
-      if (lastNames) ctx.fillText('ÚLTIMAS PARADAS: ' + lastNames, canvas.width / 2, 895);
-
       ctx.fillStyle = '#f8f1e5';
       ctx.strokeStyle = '#6f7ca8';
       ctx.lineWidth = 5;
@@ -323,33 +318,35 @@
       var gridX = 70;
       var gridY = 1245;
       var cellWidth = 218;
-      var cellHeight = 90;
+      var cellHeight = 125;
       var cellGap = 10;
       var cellColors = ['#cb2239', '#6f7ca8', '#b69c55', '#cb2239'];
+      var recentEstablishments = visits.slice(0, 5).map(function (visit) {
+        return ESTABELECIMENTOS.find(function (est) { return est.slug === visit.slug; });
+      }).filter(function (est) { return est; });
 
-      ESTABELECIMENTOS.forEach(function (est, index) {
+      recentEstablishments.forEach(function (est, index) {
         var col = index % 4;
         var row = Math.floor(index / 4);
         var x = gridX + col * (cellWidth + cellGap);
         var y = gridY + row * (cellHeight + cellGap);
-        var visit = visitedBySlug[est.slug];
         var color = cellColors[col];
 
-        ctx.fillStyle = visit ? '#fffdf7' : '#f8f7f2';
-        ctx.strokeStyle = visit ? color : '#d8dbe2';
+        ctx.fillStyle = '#fffdf7';
+        ctx.strokeStyle = color;
         ctx.lineWidth = 3;
         ctx.fillRect(x, y, cellWidth, cellHeight);
         ctx.strokeRect(x, y, cellWidth, cellHeight);
 
-        if (visit) {
-          ctx.fillStyle = color;
-          ctx.font = '700 24px Arial, sans-serif';
-          ctx.textAlign = 'center';
-          ctx.fillText(est.category === 'Sobremesas' ? 'DOCE' : est.category.toUpperCase().slice(0, 8), x + cellWidth / 2, y + 34);
-          ctx.fillStyle = '#1a2f7b';
-          ctx.font = '700 20px Arial, sans-serif';
-          drawWrappedText(ctx, est.name.toUpperCase(), x + 14, y + 65, cellWidth - 28, 22);
-        }
+        ctx.fillStyle = color;
+        ctx.fillRect(x, y, cellWidth, 10);
+        ctx.font = '700 24px Arial, sans-serif';
+        ctx.textAlign = 'center';
+        ctx.fillText(est.category === 'Sobremesas' ? 'DOCE' : est.category.toUpperCase().slice(0, 8), x + cellWidth / 2, y + 42);
+        ctx.fillStyle = '#1a2f7b';
+        ctx.font = '700 20px Arial, sans-serif';
+        ctx.textAlign = 'left';
+        drawWrappedText(ctx, est.name.toUpperCase(), x + 14, y + 76, cellWidth - 28, 22);
       });
 
       ctx.fillStyle = '#1a2f7b';
