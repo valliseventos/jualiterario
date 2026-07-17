@@ -305,14 +305,7 @@
   <script src="app-state.js"></script>
   <script src="https://unpkg.com/maplibre-gl@4/dist/maplibre-gl.js"></script>
   <script>
-    var ESTABELECIMENTOS = [
-      {"id":1,"slug":"casa-da-orla","name":"Casa da Orla","category":"Restaurante","priceLabel":"R$ 58","specialDish":"Arroz de panela com carne de sol e creme de abóbora","description":"Um ponto de encontro voltado para almoços demorados, conversa e cozinha regional com leitura contemporânea.","neighborhood":"Orla I","image":"assets/estabelecimento-1.svg","featured":true,"lat":-9.4150,"lng":-40.5030},
-      {"id":2,"slug":"cafe-da-ponte","name":"Cafe da Ponte","category":"Cafe","priceLabel":"R$ 24","specialDish":"Bolo de milho tostado com creme de queijo e café gelado","description":"Ambiente leve e urbano, pensado para pausas rápidas entre uma atividade do festival e outra.","neighborhood":"Centro","image":"assets/estabelecimento-2.svg","featured":true,"lat":-9.4080,"lng":-40.4970},
-      {"id":3,"slug":"quintal-do-velho-chico","name":"Quintal do Velho Chico","category":"Bistro","priceLabel":"R$ 67","specialDish":"Peixe grelhado com purê de macaxeira e farofa de castanhas","description":"Uma experiência mais calma, com quintal sombreado, pratos quentes e clima de fim de tarde.","neighborhood":"Orla II","image":"assets/estabelecimento-3.svg","featured":true,"lat":-9.4200,"lng":-40.5080},
-      {"id":4,"slug":"mercado-dos-sabores","name":"Mercado dos Sabores","category":"Cozinha rapida","priceLabel":"R$ 31","specialDish":"Sanduíche regional com queijo coalho, melão e melão de rapadura","description":"Parada agitada da rota, com serviço rápido, visual vibrante e proposta pensada para circular.","neighborhood":"Centro","image":"assets/estabelecimento-4.svg","featured":true,"lat":-9.4100,"lng":-40.4950},
-      {"id":5,"slug":"varanda-do-sertao","name":"Varanda do Sertao","category":"Restaurante","priceLabel":"R$ 52","specialDish":"Galinhada cremosa com picles de maxixe","description":"Comida afetiva e atmosfera familiar para quem deseja prolongar o passeio pela rota.","neighborhood":"Santo Antonio","image":"assets/estabelecimento-5.svg","featured":false,"lat":-9.4030,"lng":-40.4880},
-      {"id":6,"slug":"atelier-doce","name":"Atelier Doce","category":"Sobremesas","priceLabel":"R$ 22","specialDish":"Cartola reinterpretada com mel de umbu","description":"Pequena casa de doces e café, ideal para encerrar o circuito com uma última parada.","neighborhood":"Centro","image":"assets/estabelecimento-6.svg","featured":false,"lat":-9.4120,"lng":-40.4920}
-    ];
+    var ESTABELECIMENTOS = [];
 
     function getCategoryIcon(cat) {
       var map = { 'Restaurante': 'restaurant', 'Cafe': 'local_cafe', 'Bistro': 'wine_bar', 'Cozinha rapida': 'fastfood', 'Sobremesas': 'cake' };
@@ -334,7 +327,8 @@
       return 'location_city';
     }
 
-    function renderDetail() {
+    function renderDetail(data) {
+      ESTABELECIMENTOS = data;
       var params = new URLSearchParams(window.location.search);
       var slug = params.get('slug');
       var target = document.getElementById('detailContent');
@@ -379,7 +373,7 @@
               '</span>' +
               '<span class="detail-hero-chip">' +
                 '<span class="material-symbols-outlined">payments</span>' +
-                est.priceLabel +
+                 (est.priceLabel || 'Consultar cardápio') +
               '</span>' +
             '</div>' +
           '</div>' +
@@ -393,35 +387,37 @@
                 '<span class="material-symbols-outlined">' + (visitado ? 'check_circle' : 'radio_button_unchecked') + '</span>' +
                 '<div class="detail-visit-text">' +
                   '<strong>' + (visitado ? 'Você visitou este local' : 'Você ainda não visitou') + '</strong>' +
-                  '<span>' + (visitado ? 'Registrado em ' + visita.date : 'Escaneeie o QR code no estabelecimento') + '</span>' +
+                   '<span>' + (visitado ? 'Registrado em ' + visita.date : 'Escaneie o QR code no estabelecimento') + '</span>' +
                 '</div>' +
               '</div>' +
-              '<h2>Sobre</h2>' +
-              '<p class="detail-desc">' + est.description + '</p>' +
+               (est.image ? '<img src="' + est.image + '" alt="' + est.name + '" style="width: 100%; max-height: 280px; object-fit: cover; margin-bottom: 20px;">' : '') +
+               '<h2>Sobre</h2>' +
+                 '<p class="detail-desc">' + (est.description || 'Estabelecimento participante da Rota Gastronômica Juá Literária.') + '</p>' +
               '<div class="detail-dish">' +
                 '<div class="detail-dish-icon">' +
                   '<span class="material-symbols-outlined">restaurant</span>' +
                 '</div>' +
                 '<div>' +
                   '<h3>Prato especial</h3>' +
-                  '<p>' + est.specialDish + '</p>' +
+                 '<p>' + (est.specialDish || 'Consulte o cardápio do estabelecimento.') + '</p>' +
                 '</div>' +
               '</div>' +
               '<div class="detail-price">' +
                 '<span class="material-symbols-outlined" style="font-size: 1.1rem;">sell</span>' +
-                est.priceLabel +
+                 (est.priceLabel || 'Consultar cardápio') +
               '</div>' +
             '</div>' +
 
             '<div class="detail-card">' +
               '<h2>Localização</h2>' +
-              '<p style="font-size: 0.9rem; color: var(--color-text-soft); margin: 0 0 12px;">' +
-                '<span class="material-symbols-outlined" style="font-size: 1rem; vertical-align: middle;">location_on</span> ' +
-                est.neighborhood +
-              '</p>' +
-              '<div class="detail-map-wrap">' +
-                '<div id="estMap"></div>' +
-              '</div>' +
+               '<p style="font-size: 0.9rem; color: var(--color-text-soft); margin: 0 0 8px;">' +
+                 '<span class="material-symbols-outlined" style="font-size: 1rem; vertical-align: middle;">location_on</span> ' +
+                 (est.address || est.neighborhood) +
+               '</p>' +
+               (est.whatsapp ? '<p style="font-size: 0.9rem; color: var(--color-text-soft); margin: 0 0 8px;"><span class="material-symbols-outlined" style="font-size: 1rem; vertical-align: middle;">phone</span> ' + est.whatsapp + '</p>' : '') +
+                (est.hours ? '<p style="font-size: 0.9rem; color: var(--color-text-soft); margin: 0 0 8px;"><span class="material-symbols-outlined" style="font-size: 1rem; vertical-align: middle;">schedule</span> ' + est.hours + '</p>' : '') +
+                (est.social ? '<p style="font-size: 0.9rem; margin: 0 0 12px;"><a class="inline-link" href="' + est.social + '" target="_blank" rel="noopener">Ver Instagram/site</a></p>' : '') +
+               (est.lat && est.lng ? '<div class="detail-map-wrap"><div id="estMap"></div></div>' : '<p style="color: var(--color-text-soft); margin: 12px 0 0;">Coordenadas pendentes de validação.</p>') +
             '</div>' +
 
             '<div class="detail-card detail-full">' +
@@ -436,8 +432,8 @@
                 '</div>' +
               '</div>' +
               '<div class="detail-actions" style="margin-top: 18px;">' +
-                '<a class="button button-primary" href="scan.html?slug=' + est.slug + '">' +
-                  '<span class="material-symbols-outlined button-icon">qr_code_scanner</span>Registrar visita' +
+                '<a class="button button-primary" href="scanner.html">' +
+                  '<span class="material-symbols-outlined button-icon">qr_code_scanner</span>Ler QR Code no local' +
                 '</a>' +
                 '<a class="button button-secondary" href="passaporte.html">' +
                   '<span class="material-symbols-outlined button-icon">auto_stories</span>Ver passaporte' +
@@ -496,7 +492,10 @@
         '</div>';
     }
 
-    renderDetail();
+    fetch('data/estabelecimentos.json')
+      .then(function (response) { return response.json(); })
+      .then(renderDetail)
+      .catch(function () { renderNotFound(document.getElementById('detailContent'), 'Não foi possível carregar os estabelecimentos.'); });
   </script>
 </body>
 </html>

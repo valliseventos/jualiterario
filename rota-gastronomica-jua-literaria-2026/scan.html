@@ -64,9 +64,10 @@
     function processScan() {
       var params = new URLSearchParams(window.location.search);
       var slug = params.get('slug');
+      var qrValidated = params.get('qr') === '1';
 
-      if (!slug) {
-        renderNoSlug();
+      if (!slug || !qrValidated) {
+        renderInvalidEntry();
         return;
       }
 
@@ -183,36 +184,24 @@
         '</div>';
     }
 
-    function renderNoSlug() {
+    function renderInvalidEntry() {
       var el = document.getElementById('scanResult');
       el.innerHTML =
         '<div class="scan-state scan-noslug">' +
           '<div class="scan-icon-wrap">' +
             '<span class="material-symbols-outlined scan-icon" style="color: var(--color-secondary);">qr_code_scanner</span>' +
           '</div>' +
-          '<h2 class="scan-title">Escanear QR code</h2>' +
-          '<p class="scan-subtitle">Use a câmera do seu celular para escanear o QR code no estabelecimento.</p>' +
-          '<p class="scan-subtitle" style="font-size: 0.85rem; margin-top: 4px;">Ou digite o código do estabelecimento abaixo:</p>' +
-          '<div class="scan-manual-input">' +
-            '<input type="text" id="manualSlug" placeholder="Ex: casa-da-orla" style="flex: 1; padding: 12px 16px; border: 2px solid var(--color-secondary); font-family: \'Be Vietnam Pro\', sans-serif; font-size: 0.9rem;">' +
-            '<button onclick="manualSearch()" class="button button-primary" style="flex-shrink: 0;">Ir</button>' +
-          '</div>' +
+          '<h2 class="scan-title">Leia o QR Code no estabelecimento</h2>' +
+          '<p class="scan-subtitle">A visita só pode ser confirmada pela leitura do QR Code específico do local.</p>' +
           '<div class="scan-btn-row" style="margin-top: 20px;">' +
+            '<a class="button button-primary" href="scanner.html">' +
+              '<span class="material-symbols-outlined button-icon">qr_code_scanner</span>Abrir leitor' +
+            '</a>' +
             '<a class="button button-secondary" href="mapa.html">' +
               '<span class="material-symbols-outlined button-icon">map</span>Ver rota no mapa' +
             '</a>' +
           '</div>' +
         '</div>';
-      document.getElementById('manualSlug').addEventListener('keydown', function (e) {
-        if (e.key === 'Enter') { manualSearch(); }
-      });
-    }
-
-    function manualSearch() {
-      var slug = document.getElementById('manualSlug').value.trim().toLowerCase();
-      if (slug) {
-        window.location.href = 'scan.html?slug=' + encodeURIComponent(slug);
-      }
     }
 
     processScan();

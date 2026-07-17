@@ -99,7 +99,7 @@
           var html = '';
 
           data.forEach(function (est) {
-            var url = QR_BASE_URL + est.slug;
+            var url = QR_BASE_URL + est.slug + '&qr=1';
             html +=
               '<div class="qr-card" data-slug="' + est.slug + '">' +
                 '<img class="qr-logo" src="../assets/logo-jua-literaria.png" alt="Juá Literária">' +
@@ -114,7 +114,7 @@
           grid.innerHTML = html;
 
           data.forEach(function (est) {
-            var url = QR_BASE_URL + est.slug;
+            var url = QR_BASE_URL + est.slug + '&qr=1';
             var wrap = document.getElementById('qr-' + est.id);
             if (wrap && typeof QRCode !== 'undefined') {
               new QRCode(wrap, {

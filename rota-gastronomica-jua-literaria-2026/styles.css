@@ -634,17 +634,55 @@ a {
 }
 
 .cards-carousel {
-  display: grid;
+  display: flex;
   gap: 20px;
+  overflow-x: auto;
+  scroll-snap-type: x mandatory;
+  -webkit-overflow-scrolling: touch;
+  padding-bottom: 10px;
+  scrollbar-width: thin;
+  scrollbar-color: var(--color-secondary) transparent;
+}
+
+.cards-carousel > * {
+  flex: 0 0 clamp(300px, 31vw, 360px);
+  scroll-snap-align: start;
+}
+
+.cards-carousel::-webkit-scrollbar {
+  height: 8px;
+}
+
+.cards-carousel::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.cards-carousel::-webkit-scrollbar-thumb {
+  background: var(--color-secondary);
+  border-radius: 999px;
 }
 
 @media (max-width: 620px) {
+  .hero {
+    padding-top: 34px;
+    padding-bottom: 76px;
+  }
+
+  .hero h1 {
+    max-width: 100%;
+    font-size: clamp(2.2rem, 9vw, 4rem);
+    overflow-wrap: break-word;
+  }
+
+  .mobile-nav a {
+    padding-right: 2px;
+    padding-left: 2px;
+    font-size: clamp(0.54rem, 2vw, 0.62rem);
+    letter-spacing: 0;
+  }
+
   .cards-carousel {
-    display: flex;
     gap: 16px;
-    overflow-x: auto;
-    scroll-snap-type: x mandatory;
-    -webkit-overflow-scrolling: touch;
     padding-bottom: 8px;
     margin: 0 calc(-1 * (100vw - var(--container)) / 2);
     padding-left: calc((100vw - var(--container)) / 2);
@@ -656,11 +694,9 @@ a {
   }
   .cards-carousel > * {
     flex: 0 0 280px;
-    scroll-snap-align: start;
   }
   .cards-carousel > a {
     flex: 0 0 280px;
-    scroll-snap-align: start;
   }
 }
 
@@ -676,11 +712,21 @@ a {
   border-top: 2px solid rgba(26, 47, 123, 0.15);
 }
 
+.standard-mobile-nav {
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+}
+
+.standard-mobile-nav a {
+  min-width: 0;
+  text-align: center;
+}
+
 .mobile-nav a {
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: center;
+  min-width: 0;
   min-height: 64px;
   padding: 4px 6px;
   gap: 2px;
@@ -688,6 +734,7 @@ a {
   font-weight: 700;
   letter-spacing: 0.02em;
   text-transform: uppercase;
+  white-space: nowrap;
 }
 
 .mobile-nav .is-active {

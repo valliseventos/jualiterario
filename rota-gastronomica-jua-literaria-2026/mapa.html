@@ -164,7 +164,9 @@
         .then(function (r) { return r.json(); })
         .then(function (data) {
           data.forEach(function (est) {
-            addMarkerToMap(est);
+            if (Number.isFinite(est.lat) && Number.isFinite(est.lng)) {
+              addMarkerToMap(est);
+            }
           });
           renderSheetItems(data);
           setupFilters(data);

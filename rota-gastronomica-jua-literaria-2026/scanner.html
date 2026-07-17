@@ -15,7 +15,7 @@
 <body class="scanner-page">
   <main class="scanner-main">
     <div class="scanner-top">
-      <button class="scanner-back" onclick="stopScanner()" aria-label="Voltar">
+      <button class="scanner-back" onclick="exitScanner()" aria-label="Voltar">
         <span class="material-symbols-outlined">arrow_back</span>
       </button>
       <div class="scanner-title-area">
@@ -36,17 +36,10 @@
     <div class="scanner-error" id="scannerError" style="display: none;">
       <span class="material-symbols-outlined" style="font-size: 3rem; color: var(--color-primary);">videocam_off</span>
       <p style="font-weight: 600; margin-top: 8px;">Não foi possível acessar a câmera</p>
-      <p style="font-size: 0.85rem; color: var(--color-text-soft);">Digite o código do estabelecimento abaixo:</p>
+      <p style="font-size: 0.85rem; color: var(--color-text-soft);">Use o QR Code físico disponível no estabelecimento.</p>
     </div>
 
     <div class="scanner-bottom">
-      <div class="scanner-manual">
-        <label class="scanner-manual-label">Ou digite o código manualmente:</label>
-        <div class="scanner-manual-row">
-          <input type="text" id="scannerManualInput" placeholder="Ex: casa-da-orla" class="scanner-input">
-          <button class="button button-primary" onclick="manualGo()" style="flex-shrink: 0;">Ir</button>
-        </div>
-      </div>
       <p class="scanner-hint">
         <span class="material-symbols-outlined" style="font-size: 1rem; vertical-align: middle;">info</span>
         O QR code está no estabelecimento. Se preferir, use a câmera nativa do celular.
@@ -97,9 +90,9 @@
       var slug = extractSlug(decodedText);
 
       if (slug) {
-        window.location.href = 'scan.html?slug=' + encodeURIComponent(slug);
+        window.location.href = 'scan.html?slug=' + encodeURIComponent(slug) + '&qr=1';
       } else {
-        window.location.href = 'scan.html?slug=' + encodeURIComponent(decodedText.trim().toLowerCase());
+        window.location.href = 'scan.html?slug=' + encodeURIComponent(decodedText.trim().toLowerCase()) + '&qr=1';
       }
     }
 
@@ -130,6 +123,10 @@
         html5QrCode = null;
       }
       isScanning = false;
+    }
+
+    function exitScanner() {
+      stopScanner();
       window.location.href = 'passaporte.html';
     }
 
@@ -138,18 +135,6 @@
       document.getElementById('scannerError').style.display = 'flex';
       document.getElementById('qrReader').style.display = 'none';
     }
-
-    function manualGo() {
-      var input = document.getElementById('scannerManualInput');
-      var slug = input.value.trim().toLowerCase();
-      if (slug) {
-        window.location.href = 'scan.html?slug=' + encodeURIComponent(slug);
-      }
-    }
-
-    document.getElementById('scannerManualInput').addEventListener('keydown', function (e) {
-      if (e.key === 'Enter') { manualGo(); }
-    });
 
     startScanner();
   </script>
