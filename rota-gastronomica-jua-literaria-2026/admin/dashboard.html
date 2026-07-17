@@ -31,7 +31,7 @@
         <p class="admin-desc">Acompanhamento das visitas registradas pelos participantes da rota.</p>
         <p class="admin-note">
           <span class="material-symbols-outlined" style="font-size: 1rem; vertical-align: middle;">info</span>
-          Dados armazenados localmente no navegador. Quando a centralização via API estiver ativa, o dashboard refletirá todas as visitas consolidadas.
+           Visitantes únicos consolidados pela API. O passaporte individual continua armazenado localmente no navegador.
         </p>
       </div>
 
@@ -91,41 +91,36 @@
       return true;
     }
 
-    function renderDashboard() {
-      if (!checkAccess()) return;
+    function renderDashboard(report) {
+       if (!checkAccess()) return;
 
-       var slugsAtuais = {};
-       ESTABELECIMENTOS.forEach(function (est) { slugsAtuais[est.slug] = true; });
-       var visitas = getVisitas().filter(function (visita) { return slugsAtuais[visita.slug]; });
-      var totalEst = ESTABELECIMENTOS.length;
-      var visitados = visitas.length;
-      var progresso = totalEst > 0 ? Math.round((visitados / totalEst) * 100) : 0;
-
-      var slugsVisitados = {};
-      visitas.forEach(function (v) { slugsVisitados[v.slug] = v; });
+       var estabelecimentos = report.establishments || [];
+       var visitas = report.recentVisits || [];
+       var totalEst = estabelecimentos.length;
+       var visitados = estabelecimentos.filter(function (est) { return est.uniqueVisitors > 0; }).length;
+       var progresso = totalEst > 0 ? Math.round((visitados / totalEst) * 100) : 0;
 
       var rows = '';
-      ESTABELECIMENTOS.forEach(function (est) {
-        var visita = slugsVisitados[est.slug];
-        var statusIcon = visita
-          ? '<span class="material-symbols-outlined" style="color: var(--color-primary); font-variation-settings: \'FILL\' 1; font-size: 1.2rem;">check_circle</span>'
-          : '<span class="material-symbols-outlined" style="color: var(--color-text-soft); font-size: 1.2rem;">radio_button_unchecked</span>';
-        var dateLabel = visita ? visita.date : '—';
-        rows +=
+       estabelecimentos.forEach(function (est) {
+         var statusIcon = est.uniqueVisitors > 0
+           ? '<span class="material-symbols-outlined" style="color: var(--color-primary); font-variation-settings: \'FILL\' 1; font-size: 1.2rem;">check_circle</span>'
+           : '<span class="material-symbols-outlined" style="color: var(--color-text-soft); font-size: 1.2rem;">radio_button_unchecked</span>';
+         var dateLabel = est.latestVisit ? new Date(est.latestVisit).toLocaleString('pt-BR') : '—';
+         rows +=
           '<tr>' +
             '<td style="padding: 10px 8px; border-bottom: 1px solid rgba(26,47,123,0.1);">' + statusIcon + '</td>' +
             '<td style="padding: 10px 8px; border-bottom: 1px solid rgba(26,47,123,0.1); font-weight: 600; font-family: \'Anybody\', cursive; color: var(--color-secondary);">' + est.name + '</td>' +
             '<td style="padding: 10px 8px; border-bottom: 1px solid rgba(26,47,123,0.1); font-size: 0.78rem; color: var(--color-text-soft);">' + est.category + '</td>' +
-            '<td style="padding: 10px 8px; border-bottom: 1px solid rgba(26,47,123,0.1); font-size: 0.82rem;">' + dateLabel + '</td>' +
+             '<td style="padding: 10px 8px; border-bottom: 1px solid rgba(26,47,123,0.1); font-size: 0.82rem;">' + (est.uniqueVisitors || 0) + ' visitante' + (est.uniqueVisitors === 1 ? '' : 's') + ' · ' + dateLabel + '</td>' +
           '</tr>';
       });
 
       var timelineItems = '';
-      if (visitas.length === 0) {
+       if (visitas.length === 0) {
         timelineItems = '<div class="empty-state" style="grid-column: 1 / -1;"><span class="material-symbols-outlined" style="font-size: 2rem; color: var(--color-text-soft);">event_busy</span><p style="margin-top: 8px;">Nenhuma visita registrada ainda.</p></div>';
       } else {
-        var sorted = visitas.slice().sort(function (a, b) {
-          return a.timestamp < b.timestamp ? 1 : -1;
+         var sorted = visitas.slice().sort(function (a, b) {
+           return a.timestamp < b.timestamp ? 1 : -1;
         });
         sorted.forEach(function (v) {
           timelineItems +=
@@ -135,7 +130,7 @@
               '</div>' +
               '<div style="flex: 1; min-width: 0;">' +
                 '<strong style="font-family: \'Anybody\', cursive; font-size: 0.9rem; color: var(--color-ink); display: block;">' + v.name + '</strong>' +
-                '<span style="font-size: 0.72rem; color: var(--color-text-soft);">' + v.date + '</span>' +
+               '<span style="font-size: 0.72rem; color: var(--color-text-soft);">' + new Date(v.timestamp).toLocaleString('pt-BR') + '</span>' +
               '</div>' +
               '<span style="font-size: 0.7rem; color: var(--color-text-soft); font-weight: 600; text-transform: uppercase; letter-spacing: 0.04em;">' + v.category + '</span>' +
             '</div>';
@@ -145,13 +140,13 @@
       var el = document.getElementById('dashboardContent');
       el.innerHTML =
         '<div class="placeholder-stat-grid" style="margin-bottom: 36px;">' +
-          '<div class="placeholder-stat" style="text-align: center;">' +
-            '<strong>' + visitados + '</strong>' +
-            '<span style="font-size: 0.78rem; color: var(--color-text-soft); text-transform: uppercase; letter-spacing: 0.04em; font-weight: 600;">Selos coletados</span>' +
+           '<div class="placeholder-stat" style="text-align: center;">' +
+             '<strong>' + (report.totalVisitors || 0) + '</strong>' +
+             '<span style="font-size: 0.78rem; color: var(--color-text-soft); text-transform: uppercase; letter-spacing: 0.04em; font-weight: 600;">Visitantes únicos</span>' +
           '</div>' +
           '<div class="placeholder-stat" style="text-align: center;">' +
             '<strong>' + totalEst + '</strong>' +
-            '<span style="font-size: 0.78rem; color: var(--color-text-soft); text-transform: uppercase; letter-spacing: 0.04em; font-weight: 600;">Estabelecimentos</span>' +
+             '<span style="font-size: 0.78rem; color: var(--color-text-soft); text-transform: uppercase; letter-spacing: 0.04em; font-weight: 600;">Estabelecimentos</span>' +
           '</div>' +
           '<div class="placeholder-stat" style="text-align: center;">' +
             '<strong>' + progresso + '%</strong>' +
@@ -194,7 +189,28 @@
       .then(function (response) { return response.json(); })
       .then(function (data) {
         ESTABELECIMENTOS = data;
-        renderDashboard();
+        fetch('/api/dashboard/visitas')
+          .then(function (response) {
+            if (!response.ok) throw new Error('Dashboard API indisponível');
+            return response.json();
+          })
+          .then(renderDashboard)
+          .catch(function () {
+            renderDashboard({
+              totalVisitors: 0,
+              establishments: data.map(function (est) {
+                return {
+                  id: est.id,
+                  slug: est.slug,
+                  name: est.name,
+                  category: est.category,
+                  uniqueVisitors: 0,
+                  latestVisit: null
+                };
+              }),
+              recentVisits: []
+            });
+          });
       })
       .catch(function () {
         document.getElementById('dashboardContent').innerHTML =

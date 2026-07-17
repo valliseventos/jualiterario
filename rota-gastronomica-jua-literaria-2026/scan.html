@@ -101,6 +101,7 @@
         renderError('Não foi possível registrar. Verifique o armazenamento do navegador.');
         return;
       }
+      registrarVisitaServidor(est.slug);
 
       var el = document.getElementById('scanResult');
       el.innerHTML =

@@ -1,5 +1,44 @@
 var STORAGE_KEY = 'rotas_visitas';
 var PARTICIPANT_NAME_KEY = 'rota_participante_nome';
+var VISITOR_ID_KEY = 'rota_visitante_id';
+var EVENT_SLUG = 'jua-literaria-2026';
+
+function getVisitorId() {
+  try {
+    var existing = localStorage.getItem(VISITOR_ID_KEY);
+    if (existing) return existing;
+
+    var id = window.crypto && window.crypto.randomUUID
+      ? window.crypto.randomUUID()
+      : 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function (c) {
+          var r = Math.random() * 16 | 0;
+          var v = c === 'x' ? r : (r & 0x3 | 0x8);
+          return v.toString(16);
+        });
+    localStorage.setItem(VISITOR_ID_KEY, id);
+    return id;
+  } catch (e) {
+    return '';
+  }
+}
+
+function registrarVisitaServidor(establishmentSlug) {
+  var visitorId = getVisitorId();
+  if (!visitorId || !establishmentSlug) return;
+
+  fetch('/api/visitas', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({
+      visitorId: visitorId,
+      establishmentSlug: establishmentSlug,
+      event: EVENT_SLUG
+    }),
+    keepalive: true
+  }).catch(function () {
+    // O passaporte local continua funcionando se a API estiver indisponível.
+  });
+}
 
 function getParticipantName() {
   try {
