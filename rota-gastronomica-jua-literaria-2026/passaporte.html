@@ -1,0 +1,177 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Passaporte Digital · Rota Gastronômica Juá Literária 2026</title>
+  <meta name="description" content="Seu passaporte digital da Rota Gastronômica Juá Literária 2026. Registre visitas, colecione selos e acompanhe sua jornada pelos estabelecimentos participantes.">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Anybody:wght@600;700;800&family=Be+Vietnam+Pro:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body class="passport-page">
+  <header class="site-header">
+    <div class="container header-shell">
+      <a class="wordmark" href="index.html" aria-label="Página inicial da rota"><img src="assets/logo-jua-literaria.png" alt="Rota Gastronômica Juá Literária 2026"></a>
+      <nav class="desktop-nav" aria-label="Principal">
+        <a href="mapa.html">Mapa</a>
+        <a href="restaurantes.html">Restaurantes</a>
+        <a href="index.html#como-funciona">Como funciona</a>
+        <a class="is-active" href="passaporte.html">Passaporte</a>
+      </nav>
+    </div>
+  </header>
+
+  <main>
+    <div class="container">
+      <section class="passport-profile">
+        <div class="passport-profile-bg" aria-hidden="true">
+          <span class="material-symbols-outlined">auto_stories</span>
+        </div>
+        <img class="passport-profile-logo" src="assets/logo-jua-literaria.png" alt="Juá Literária">
+        <div class="passport-profile-content">
+          <h1 class="passport-profile-name">Rota Gastronômica</h1>
+          <span class="passport-profile-badge">Passaporte digital</span>
+          <div class="passport-profile-progress">
+            <div class="progress-header">
+              <span>Progresso da Rota</span>
+              <span class="progress-count" id="progressCount">
+                0 <span class="progress-total">/ 6 selos</span>
+              </span>
+            </div>
+            <div class="progress-track">
+              <div class="progress-fill" id="progressFill" style="width: 0%;"></div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section>
+        <div class="section-heading" style="margin-bottom: 18px;">
+          <p class="section-label">Meus selos</p>
+        </div>
+        <div class="stamps-grid" id="stampsGrid">
+          <div class="stamp-card" style="grid-column: 1 / -1; opacity: 0.6;">
+            <div class="stamp-icon-wrap" style="border-color: var(--color-text-soft); color: var(--color-text-soft);">
+              <span class="material-symbols-outlined">search</span>
+            </div>
+            <span class="stamp-name">Carregando...</span>
+          </div>
+        </div>
+      </section>
+
+      <section class="passport-info">
+        <div class="passport-info-icon">
+          <span class="material-symbols-outlined">featured_play_list</span>
+        </div>
+        <div>
+          <h3>Complete sua coleção</h3>
+          <p>Faltam <strong id="missingCount">6</strong> estabelecimentos para completar todos os selos da rota.</p>
+        </div>
+      </section>
+    </div>
+  </main>
+
+  <a class="qr-fab" href="scanner.html">
+    <span class="material-symbols-outlined" style="font-size: 1.3rem; font-variation-settings: 'FILL' 1;">qr_code_scanner</span>
+    Escanear QR
+  </a>
+
+  <nav class="mobile-nav" aria-label="Navegação inferior">
+    <a href="index.html">
+      <span class="material-symbols-outlined nav-icon">home</span>
+      Início
+    </a>
+    <a href="mapa.html">
+      <span class="material-symbols-outlined nav-icon">map</span>
+      Mapa
+    </a>
+    <a class="is-active" href="passaporte.html">
+      <span class="material-symbols-outlined nav-icon">auto_stories</span>
+      Passaporte
+    </a>
+  </nav>
+
+  <script src="app-state.js"></script>
+  <script>
+    var ESTABELECIMENTOS = [
+      {"id":1,"slug":"casa-da-orla","name":"Casa da Orla","category":"Restaurante","priceLabel":"R$ 58","specialDish":"Arroz de panela com carne de sol e creme de abóbora","description":"Um ponto de encontro voltado para almoços demorados, conversa e cozinha regional com leitura contemporânea.","neighborhood":"Orla I","image":"assets/estabelecimento-1.svg","featured":true},
+      {"id":2,"slug":"cafe-da-ponte","name":"Cafe da Ponte","category":"Cafe","priceLabel":"R$ 24","specialDish":"Bolo de milho tostado com creme de queijo e café gelado","description":"Ambiente leve e urbano, pensado para pausas rápidas entre uma atividade do festival e outra.","neighborhood":"Centro","image":"assets/estabelecimento-2.svg","featured":true},
+      {"id":3,"slug":"quintal-do-velho-chico","name":"Quintal do Velho Chico","category":"Bistro","priceLabel":"R$ 67","specialDish":"Peixe grelhado com purê de macaxeira e farofa de castanhas","description":"Uma experiência mais calma, com quintal sombreado, pratos quentes e clima de fim de tarde.","neighborhood":"Orla II","image":"assets/estabelecimento-3.svg","featured":true},
+      {"id":4,"slug":"mercado-dos-sabores","name":"Mercado dos Sabores","category":"Cozinha rapida","priceLabel":"R$ 31","specialDish":"Sanduíche regional com queijo coalho, melão e melão de rapadura","description":"Parada agitada da rota, com serviço rápido, visual vibrante e proposta pensada para circular.","neighborhood":"Centro","image":"assets/estabelecimento-4.svg","featured":true},
+      {"id":5,"slug":"varanda-do-sertao","name":"Varanda do Sertao","category":"Restaurante","priceLabel":"R$ 52","specialDish":"Galinhada cremosa com picles de maxixe","description":"Comida afetiva e atmosfera familiar para quem deseja prolongar o passeio pela rota.","neighborhood":"Santo Antonio","image":"assets/estabelecimento-5.svg","featured":false},
+      {"id":6,"slug":"atelier-doce","name":"Atelier Doce","category":"Sobremesas","priceLabel":"R$ 22","specialDish":"Cartola reinterpretada com mel de umbu","description":"Pequena casa de doces e café, ideal para encerrar o circuito com uma última parada.","neighborhood":"Centro","image":"assets/estabelecimento-6.svg","featured":false}
+    ];
+
+    var COLOR_CYCLE = ['style-primary', 'style-secondary', 'style-tertiary'];
+    var ROTATIONS = [-8, 6, -4, 10, -6, 8];
+    var BADGE_ROTATIONS = [8, -10, 6, -6, 12, -8];
+    var SLUGS_VISITADOS = getSlugsVisitados();
+
+    function getCategoryIcon(cat) {
+      var map = { 'Restaurante': 'restaurant', 'Cafe': 'local_cafe', 'Bistro': 'wine_bar', 'Cozinha rapida': 'fastfood', 'Sobremesas': 'cake' };
+      return map[cat] || 'restaurant';
+    }
+
+    function renderPassport() {
+      var data = ESTABELECIMENTOS;
+      var total = data.length;
+      var count = 0;
+      var colorIdx = 0;
+
+      data.forEach(function (est) {
+        if (SLUGS_VISITADOS.indexOf(est.slug) !== -1) { count++; }
+      });
+
+      document.getElementById('progressCount').innerHTML =
+        count + ' <span class="progress-total">/ ' + total + ' selos</span>';
+      document.getElementById('progressFill').style.width = (count / total * 100) + '%';
+      var el = document.getElementById('missingCount');
+      if (el) el.textContent = total - count;
+
+      var grid = document.getElementById('stampsGrid');
+      var html = '';
+
+      data.forEach(function (est, i) {
+        var isCollected = SLUGS_VISITADOS.indexOf(est.slug) !== -1;
+        var visita = isCollected ? getVisitaPorSlug(est.slug) : null;
+        var dateStr = visita ? visita.date : '';
+        var rot = ROTATIONS[i % ROTATIONS.length];
+        var badgeRot = BADGE_ROTATIONS[i % BADGE_ROTATIONS.length];
+        var colorClass = isCollected ? COLOR_CYCLE[colorIdx++ % COLOR_CYCLE.length] : '';
+
+        if (isCollected) {
+          html +=
+            '<div class="stamp-card collected">' +
+              '<div class="stamp-badge" style="transform: rotate(' + badgeRot + 'deg);">' +
+                '<span class="material-symbols-outlined" style="font-size: 0.9rem; font-variation-settings: \'FILL\' 1;">check</span>' +
+              '</div>' +
+              '<div class="stamp-icon-wrap ' + colorClass + '" style="transform: rotate(' + rot + 'deg);">' +
+                '<span class="material-symbols-outlined" style="font-variation-settings: \'FILL\' 1;">' + getCategoryIcon(est.category) + '</span>' +
+              '</div>' +
+              '<span class="stamp-name">' + est.name + '</span>' +
+              '<span class="stamp-meta">' + est.category + '</span>' +
+              '<span class="stamp-date">' + dateStr + '</span>' +
+            '</div>';
+        } else {
+          html +=
+            '<div class="stamp-card locked">' +
+              '<div class="stamp-icon-wrap" style="transform: rotate(' + rot + 'deg);">' +
+                '<span class="material-symbols-outlined stamp-lock-icon">lock</span>' +
+              '</div>' +
+              '<span class="stamp-name">' + est.name + '</span>' +
+              '<span class="stamp-meta">' + est.category + '</span>' +
+              '<span class="stamp-date">Próxima parada</span>' +
+            '</div>';
+        }
+      });
+
+      grid.innerHTML = html;
+    }
+
+    renderPassport();
+  </script>
+</body>
+</html>

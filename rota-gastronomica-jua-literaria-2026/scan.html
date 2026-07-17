@@ -1,0 +1,221 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Registrar Visita · Rota Gastronômica Juá Literária 2026</title>
+  <meta name="description" content="Registre sua visita a um estabelecimento da Rota Gastronômica Juá Literária 2026.">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Anybody:wght@600;700;800&family=Be+Vietnam+Pro:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body class="scan-page">
+  <header class="site-header">
+    <div class="container header-shell">
+      <a class="wordmark" href="index.html" aria-label="Página inicial da rota"><img src="assets/logo-jua-literaria.png" alt="Rota Gastronômica Juá Literária 2026"></a>
+      <nav class="desktop-nav" aria-label="Principal">
+        <a href="mapa.html">Mapa</a>
+        <a href="restaurantes.html">Restaurantes</a>
+        <a href="passaporte.html">Passaporte</a>
+      </nav>
+    </div>
+  </header>
+
+  <main class="scan-main">
+    <div class="container">
+      <div class="scan-card" id="scanResult">
+        <div class="scan-loading" id="scanLoading">
+          <span class="material-symbols-outlined" style="font-size: 3rem; color: var(--color-text-soft);">hourglass_top</span>
+          <p style="margin-top: 12px; font-weight: 600;">Validando visita...</p>
+        </div>
+      </div>
+    </div>
+  </main>
+
+  <nav class="mobile-nav" aria-label="Navegação inferior">
+    <a href="index.html">
+      <span class="material-symbols-outlined nav-icon">home</span>
+      Início
+    </a>
+    <a href="mapa.html">
+      <span class="material-symbols-outlined nav-icon">map</span>
+      Mapa
+    </a>
+    <a href="passaporte.html">
+      <span class="material-symbols-outlined nav-icon">auto_stories</span>
+      Passaporte
+    </a>
+  </nav>
+
+  <script src="app-state.js"></script>
+  <script>
+    function getCategoryIcon(cat) {
+      var map = { 'Restaurante': 'restaurant', 'Cafe': 'local_cafe', 'Bistro': 'wine_bar', 'Cozinha rapida': 'fastfood', 'Sobremesas': 'cake' };
+      return map[cat] || 'restaurant';
+    }
+
+    function getCategoryStyle(cat) {
+      var map = { 'Restaurante': 'style-primary', 'Cafe': 'style-secondary', 'Bistro': 'style-tertiary', 'Cozinha rapida': 'style-primary', 'Sobremesas': 'style-secondary' };
+      return map[cat] || 'style-primary';
+    }
+
+    function processScan() {
+      var params = new URLSearchParams(window.location.search);
+      var slug = params.get('slug');
+
+      if (!slug) {
+        renderNoSlug();
+        return;
+      }
+
+      fetch('data/estabelecimentos.json')
+        .then(function (r) { return r.json(); })
+        .then(function (data) {
+          var est = null;
+          for (var i = 0; i < data.length; i++) {
+            if (data[i].slug === slug) { est = data[i]; break; }
+          }
+
+          if (!est) {
+            renderError('Estabelecimento não encontrado');
+            return;
+          }
+
+          if (isVisitado(slug)) {
+            renderDuplicate(est);
+          } else {
+            renderSuccess(est);
+          }
+        })
+        .catch(function () {
+          renderError('Erro ao carregar dados da rota');
+        });
+    }
+
+    function renderSuccess(est) {
+      var saved = salvarVisita(est.slug, est.name, est.category);
+      if (!saved) {
+        renderError('Não foi possível registrar. Verifique o armazenamento do navegador.');
+        return;
+      }
+
+      var el = document.getElementById('scanResult');
+      el.innerHTML =
+        '<div class="scan-state scan-success">' +
+          '<div class="scan-icon-wrap">' +
+            '<span class="material-symbols-outlined scan-icon">check_circle</span>' +
+          '</div>' +
+          '<h2 class="scan-title">Visita registrada!</h2>' +
+          '<p class="scan-subtitle">Mais um selo no seu passaporte</p>' +
+          '<div class="scan-est-info">' +
+            '<div class="scan-est-icon ' + getCategoryStyle(est.category) + '">' +
+              '<span class="material-symbols-outlined" style="font-variation-settings: \'FILL\' 1;">' + getCategoryIcon(est.category) + '</span>' +
+            '</div>' +
+            '<div>' +
+              '<strong class="scan-est-name">' + est.name + '</strong>' +
+              '<span class="scan-est-cat">' + est.category + '</span>' +
+            '</div>' +
+          '</div>' +
+          '<div class="scan-count">' +
+            '<span class="material-symbols-outlined" style="font-size: 1.1rem; color: var(--color-primary);">auto_stories</span>' +
+            '<span><strong id="scanCount">' + getContagem() + '</strong> selo' + (getContagem() !== 1 ? 's' : '') + ' coletado' + (getContagem() !== 1 ? 's' : '') + '</span>' +
+          '</div>' +
+          '<div class="scan-btn-row">' +
+            '<a class="button button-primary" href="passaporte.html">' +
+              '<span class="material-symbols-outlined button-icon">auto_stories</span>Ver passaporte' +
+            '</a>' +
+            '<a class="button button-secondary" href="mapa.html">' +
+              '<span class="material-symbols-outlined button-icon">map</span>Voltar ao mapa' +
+            '</a>' +
+          '</div>' +
+        '</div>';
+    }
+
+    function renderDuplicate(est) {
+      var visita = getVisitaPorSlug(est.slug);
+      var el = document.getElementById('scanResult');
+      el.innerHTML =
+        '<div class="scan-state scan-duplicate">' +
+          '<div class="scan-icon-wrap">' +
+            '<span class="material-symbols-outlined scan-icon">info</span>' +
+          '</div>' +
+          '<h2 class="scan-title">Você já visitou este local</h2>' +
+          '<div class="scan-est-info">' +
+            '<div class="scan-est-icon ' + getCategoryStyle(est.category) + '">' +
+              '<span class="material-symbols-outlined" style="font-variation-settings: \'FILL\' 1;">' + getCategoryIcon(est.category) + '</span>' +
+            '</div>' +
+            '<div>' +
+              '<strong class="scan-est-name">' + est.name + '</strong>' +
+              '<span class="scan-est-cat">' + est.category + '</span>' +
+            '</div>' +
+          '</div>' +
+          '<p class="scan-date-info">Registrado em <strong>' + (visita ? visita.date : '') + '</strong></p>' +
+          '<div class="scan-btn-row">' +
+            '<a class="button button-primary" href="passaporte.html">' +
+              '<span class="material-symbols-outlined button-icon">auto_stories</span>Ver passaporte' +
+            '</a>' +
+            '<a class="button button-secondary" href="mapa.html">' +
+              '<span class="material-symbols-outlined button-icon">map</span>Explorar rota' +
+            '</a>' +
+          '</div>' +
+        '</div>';
+    }
+
+    function renderError(msg) {
+      var el = document.getElementById('scanResult');
+      el.innerHTML =
+        '<div class="scan-state scan-error">' +
+          '<div class="scan-icon-wrap">' +
+            '<span class="material-symbols-outlined scan-icon">error_outline</span>' +
+          '</div>' +
+          '<h2 class="scan-title">QR code inválido</h2>' +
+          '<p class="scan-subtitle">' + (msg || 'Não foi possível processar este QR code.') + '</p>' +
+          '<div class="scan-btn-row">' +
+            '<a class="button button-primary" href="mapa.html">' +
+              '<span class="material-symbols-outlined button-icon">map</span>Ir para o mapa' +
+            '</a>' +
+            '<a class="button button-secondary" href="passaporte.html">' +
+              '<span class="material-symbols-outlined button-icon">auto_stories</span>Ver passaporte' +
+            '</a>' +
+          '</div>' +
+        '</div>';
+    }
+
+    function renderNoSlug() {
+      var el = document.getElementById('scanResult');
+      el.innerHTML =
+        '<div class="scan-state scan-noslug">' +
+          '<div class="scan-icon-wrap">' +
+            '<span class="material-symbols-outlined scan-icon" style="color: var(--color-secondary);">qr_code_scanner</span>' +
+          '</div>' +
+          '<h2 class="scan-title">Escanear QR code</h2>' +
+          '<p class="scan-subtitle">Use a câmera do seu celular para escanear o QR code no estabelecimento.</p>' +
+          '<p class="scan-subtitle" style="font-size: 0.85rem; margin-top: 4px;">Ou digite o código do estabelecimento abaixo:</p>' +
+          '<div class="scan-manual-input">' +
+            '<input type="text" id="manualSlug" placeholder="Ex: casa-da-orla" style="flex: 1; padding: 12px 16px; border: 2px solid var(--color-secondary); font-family: \'Be Vietnam Pro\', sans-serif; font-size: 0.9rem;">' +
+            '<button onclick="manualSearch()" class="button button-primary" style="flex-shrink: 0;">Ir</button>' +
+          '</div>' +
+          '<div class="scan-btn-row" style="margin-top: 20px;">' +
+            '<a class="button button-secondary" href="mapa.html">' +
+              '<span class="material-symbols-outlined button-icon">map</span>Ver rota no mapa' +
+            '</a>' +
+          '</div>' +
+        '</div>';
+      document.getElementById('manualSlug').addEventListener('keydown', function (e) {
+        if (e.key === 'Enter') { manualSearch(); }
+      });
+    }
+
+    function manualSearch() {
+      var slug = document.getElementById('manualSlug').value.trim().toLowerCase();
+      if (slug) {
+        window.location.href = 'scan.html?slug=' + encodeURIComponent(slug);
+      }
+    }
+
+    processScan();
+  </script>
+</body>
+</html>

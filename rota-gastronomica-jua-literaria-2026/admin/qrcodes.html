@@ -1,0 +1,143 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>QR Codes · Equipe · Rota Gastronômica Juá Literária 2026</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Anybody:wght@600;700;800&family=Be+Vietnam+Pro:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="../styles.css">
+  <script src="https://cdn.jsdelivr.net/npm/qrcodejs@1.0.0/qrcode.min.js"></script>
+</head>
+<body class="admin-page">
+  <header class="site-header no-print">
+    <div class="container header-shell">
+      <a class="wordmark" href="../index.html" aria-label="Página inicial da rota"><img src="../assets/logo-jua-literaria.png" alt="Rota Gastronômica Juá Literária 2026"></a>
+      <nav class="desktop-nav" aria-label="Principal">
+        <a href="../mapa.html">Mapa</a>
+        <a href="../restaurantes.html">Restaurantes</a>
+        <a href="../passaporte.html">Passaporte</a>
+      </nav>
+    </div>
+  </header>
+
+  <main>
+    <div class="container">
+      <div class="admin-header no-print">
+        <p class="eyebrow" style="margin-bottom: 18px;">Equipe · QR codes</p>
+        <h1 class="admin-title">QR codes dos estabelecimentos</h1>
+        <p class="admin-desc">Gere, imprima e recorte os QR codes para distribuir nos estabelecimentos participantes.</p>
+        <p class="admin-note">
+          <span class="material-symbols-outlined" style="font-size: 1rem; vertical-align: middle;">info</span>
+          URL base: <code id="baseUrlDisplay" style="background: var(--color-surface); padding: 2px 8px; border: 1px solid var(--color-secondary); font-size: 0.85rem;"></code>
+          — altere antes de imprimir se o domínio mudar.
+        </p>
+        <div class="admin-actions">
+          <button class="button button-primary" onclick="window.print()">
+            <span class="material-symbols-outlined button-icon">print</span>
+            Imprimir todos
+          </button>
+        </div>
+      </div>
+
+      <div class="qr-grid" id="qrGrid">
+        <div class="qr-card" style="grid-column: 1 / -1; text-align: center; padding: 40px; opacity: 0.6;">
+          <span class="material-symbols-outlined" style="font-size: 2rem;">search</span>
+          <p style="margin-top: 8px;">Carregando estabelecimentos...</p>
+        </div>
+      </div>
+    </div>
+  </main>
+
+  <nav class="mobile-nav no-print" aria-label="Navegação inferior">
+    <a href="../index.html">
+      <span class="material-symbols-outlined nav-icon">home</span>
+      Início
+    </a>
+    <a href="../mapa.html">
+      <span class="material-symbols-outlined nav-icon">map</span>
+      Mapa
+    </a>
+    <a href="../passaporte.html">
+      <span class="material-symbols-outlined nav-icon">auto_stories</span>
+      Passaporte
+    </a>
+  </nav>
+
+  <script>
+    var QR_BASE_URL = 'https://rotagastronomica.app/scan.html?slug=';
+
+    document.getElementById('baseUrlDisplay').textContent = QR_BASE_URL;
+
+    var ADMIN_PASSWORD = 'juazeiro2026';
+
+    function checkAccess() {
+      var pwd = prompt('Acesso restrito à equipe. Digite a senha:');
+      if (pwd !== ADMIN_PASSWORD) {
+        document.body.innerHTML =
+          '<div style="display: flex; align-items: center; justify-content: center; min-height: 100vh; font-family: \'Be Vietnam Pro\', sans-serif; text-align: center; padding: 40px;">' +
+            '<div>' +
+              '<span class="material-symbols-outlined" style="font-size: 4rem; color: var(--color-text-soft);">lock</span>' +
+              '<h1 style="font-family: \'Anybody\', cursive; color: var(--color-secondary); margin: 12px 0 4px;">Acesso negado</h1>' +
+              '<p style="color: var(--color-text-soft);">Senha incorreta.</p>' +
+            '</div>' +
+          '</div>';
+        return false;
+      }
+      return true;
+    }
+
+    function generateQRCodes() {
+      if (!checkAccess()) { return; }
+
+      fetch('../data/estabelecimentos.json')
+        .then(function (r) { return r.json(); })
+        .then(function (data) {
+          var grid = document.getElementById('qrGrid');
+          var html = '';
+
+          data.forEach(function (est) {
+            var url = QR_BASE_URL + est.slug;
+            html +=
+              '<div class="qr-card" data-slug="' + est.slug + '">' +
+                '<img class="qr-logo" src="../assets/logo-jua-literaria.png" alt="Juá Literária">' +
+                '<h3 class="qr-name">' + est.name + '</h3>' +
+                '<span class="qr-category">' + est.category + '</span>' +
+                '<p class="qr-instruction">Aponte a câmera do celular para este QR code</p>' +
+                '<div class="qr-canvas-wrap" id="qr-' + est.id + '"></div>' +
+                '<code class="qr-url">' + url + '</code>' +
+              '</div>';
+          });
+
+          grid.innerHTML = html;
+
+          data.forEach(function (est) {
+            var url = QR_BASE_URL + est.slug;
+            var wrap = document.getElementById('qr-' + est.id);
+            if (wrap && typeof QRCode !== 'undefined') {
+              new QRCode(wrap, {
+                text: url,
+                width: 180,
+                height: 180,
+                colorDark: '#1a2f7b',
+                colorLight: '#ffffff',
+                correctLevel: QRCode.CorrectLevel.H
+              });
+            }
+          });
+        })
+        .catch(function () {
+          document.getElementById('qrGrid').innerHTML =
+            '<div class="qr-card" style="grid-column: 1 / -1; text-align: center; padding: 40px; opacity: 0.6;">' +
+              '<span class="material-symbols-outlined" style="font-size: 2rem;">error_outline</span>' +
+              '<p style="margin-top: 8px;">Erro ao carregar dados</p>' +
+            '</div>';
+        });
+    }
+
+    generateQRCodes();
+  </script>
+</body>
+</html>

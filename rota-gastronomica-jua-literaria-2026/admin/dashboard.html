@@ -1,0 +1,200 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Dashboard · Equipe · Rota Gastronômica Juá Literária 2026</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Anybody:wght@600;700;800&family=Be+Vietnam+Pro:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="../styles.css">
+</head>
+<body class="admin-page">
+  <header class="site-header no-print">
+    <div class="container header-shell">
+      <a class="wordmark" href="../index.html" aria-label="Página inicial da rota"><img src="../assets/logo-jua-literaria.png" alt="Rota Gastronômica Juá Literária 2026"></a>
+      <nav class="desktop-nav" aria-label="Principal">
+        <a href="../mapa.html">Mapa</a>
+        <a href="../restaurantes.html">Restaurantes</a>
+        <a href="../passaporte.html">Passaporte</a>
+      </nav>
+    </div>
+  </header>
+
+  <main>
+    <div class="container">
+      <div class="admin-header no-print">
+        <p class="eyebrow" style="margin-bottom: 18px;">Equipe · Painel</p>
+        <h1 class="admin-title">Dashboard de visitas</h1>
+        <p class="admin-desc">Acompanhamento das visitas registradas pelos participantes da rota.</p>
+        <p class="admin-note">
+          <span class="material-symbols-outlined" style="font-size: 1rem; vertical-align: middle;">info</span>
+          Dados armazenados localmente no navegador. Quando a centralização via API estiver ativa, o dashboard refletirá todas as visitas consolidadas.
+        </p>
+      </div>
+
+      <div id="dashboardContent">
+        <div style="text-align: center; padding: 60px 0;">
+          <span class="material-symbols-outlined" style="font-size: 2.4rem; color: var(--color-text-soft);">progress_activity</span>
+          <p style="margin-top: 12px; color: var(--color-text-soft);">Carregando dados...</p>
+        </div>
+      </div>
+    </div>
+  </main>
+
+  <nav class="mobile-nav no-print" aria-label="Navegação inferior">
+    <a href="../index.html">
+      <span class="material-symbols-outlined nav-icon">home</span>
+      Início
+    </a>
+    <a href="../mapa.html">
+      <span class="material-symbols-outlined nav-icon">map</span>
+      Mapa
+    </a>
+    <a href="../passaporte.html">
+      <span class="material-symbols-outlined nav-icon">auto_stories</span>
+      Passaporte
+    </a>
+  </nav>
+
+  <script src="../app-state.js"></script>
+  <script>
+    var ADMIN_PASSWORD = 'juazeiro2026';
+
+    var ESTABELECIMENTOS = [
+      {"id":1,"slug":"casa-da-orla","name":"Casa da Orla","category":"Restaurante","neighborhood":"Orla I"},
+      {"id":2,"slug":"cafe-da-ponte","name":"Cafe da Ponte","category":"Cafe","neighborhood":"Centro"},
+      {"id":3,"slug":"quintal-do-velho-chico","name":"Quintal do Velho Chico","category":"Bistro","neighborhood":"Orla II"},
+      {"id":4,"slug":"mercado-dos-sabores","name":"Mercado dos Sabores","category":"Cozinha rapida","neighborhood":"Centro"},
+      {"id":5,"slug":"varanda-do-sertao","name":"Varanda do Sertao","category":"Restaurante","neighborhood":"Santo Antonio"},
+      {"id":6,"slug":"atelier-doce","name":"Atelier Doce","category":"Sobremesas","neighborhood":"Centro"}
+    ];
+
+    function getCategoryIcon(cat) {
+      var map = { 'Restaurante': 'restaurant', 'Cafe': 'local_cafe', 'Bistro': 'wine_bar', 'Cozinha rapida': 'fastfood', 'Sobremesas': 'cake' };
+      return map[cat] || 'restaurant';
+    }
+
+    function getCategoryStyle(cat) {
+      var map = { 'Restaurante': 'style-primary', 'Cafe': 'style-secondary', 'Bistro': 'style-tertiary', 'Cozinha rapida': 'style-primary', 'Sobremesas': 'style-secondary' };
+      return map[cat] || 'style-primary';
+    }
+
+    function checkAccess() {
+      var pwd = prompt('Acesso restrito à equipe. Digite a senha:');
+      if (pwd !== ADMIN_PASSWORD) {
+        document.body.innerHTML =
+          '<div style="display: flex; align-items: center; justify-content: center; min-height: 100vh; font-family: \'Be Vietnam Pro\', sans-serif; text-align: center; padding: 40px;">' +
+            '<div>' +
+              '<span class="material-symbols-outlined" style="font-size: 4rem; color: var(--color-text-soft);">lock</span>' +
+              '<h1 style="font-family: \'Anybody\', cursive; color: var(--color-secondary); margin: 12px 0 4px;">Acesso negado</h1>' +
+              '<p style="color: var(--color-text-soft);">Senha incorreta.</p>' +
+            '</div>' +
+          '</div>';
+        return false;
+      }
+      return true;
+    }
+
+    function renderDashboard() {
+      if (!checkAccess()) return;
+
+      var visitas = getVisitas();
+      var totalEst = ESTABELECIMENTOS.length;
+      var visitados = visitas.length;
+      var progresso = totalEst > 0 ? Math.round((visitados / totalEst) * 100) : 0;
+
+      var slugsVisitados = {};
+      visitas.forEach(function (v) { slugsVisitados[v.slug] = v; });
+
+      var rows = '';
+      ESTABELECIMENTOS.forEach(function (est) {
+        var visita = slugsVisitados[est.slug];
+        var statusIcon = visita
+          ? '<span class="material-symbols-outlined" style="color: var(--color-primary); font-variation-settings: \'FILL\' 1; font-size: 1.2rem;">check_circle</span>'
+          : '<span class="material-symbols-outlined" style="color: var(--color-text-soft); font-size: 1.2rem;">radio_button_unchecked</span>';
+        var dateLabel = visita ? visita.date : '—';
+        rows +=
+          '<tr>' +
+            '<td style="padding: 10px 8px; border-bottom: 1px solid rgba(26,47,123,0.1);">' + statusIcon + '</td>' +
+            '<td style="padding: 10px 8px; border-bottom: 1px solid rgba(26,47,123,0.1); font-weight: 600; font-family: \'Anybody\', cursive; color: var(--color-secondary);">' + est.name + '</td>' +
+            '<td style="padding: 10px 8px; border-bottom: 1px solid rgba(26,47,123,0.1); font-size: 0.78rem; color: var(--color-text-soft);">' + est.category + '</td>' +
+            '<td style="padding: 10px 8px; border-bottom: 1px solid rgba(26,47,123,0.1); font-size: 0.82rem;">' + dateLabel + '</td>' +
+          '</tr>';
+      });
+
+      var timelineItems = '';
+      if (visitas.length === 0) {
+        timelineItems = '<div class="empty-state" style="grid-column: 1 / -1;"><span class="material-symbols-outlined" style="font-size: 2rem; color: var(--color-text-soft);">event_busy</span><p style="margin-top: 8px;">Nenhuma visita registrada ainda.</p></div>';
+      } else {
+        var sorted = visitas.slice().sort(function (a, b) {
+          return a.timestamp < b.timestamp ? 1 : -1;
+        });
+        sorted.forEach(function (v) {
+          timelineItems +=
+            '<div style="display: flex; align-items: center; gap: 14px; padding: 12px 14px; background: rgba(255,255,255,0.92); border: 1px solid var(--color-secondary);">' +
+              '<div style="width: 36px; height: 36px; border-radius: 50%; background: var(--color-secondary); display: flex; align-items: center; justify-content: center; flex-shrink: 0;">' +
+                '<span class="material-symbols-outlined" style="font-size: 1.1rem; color: #fff; font-variation-settings: \'FILL\' 1;">' + getCategoryIcon(v.category) + '</span>' +
+              '</div>' +
+              '<div style="flex: 1; min-width: 0;">' +
+                '<strong style="font-family: \'Anybody\', cursive; font-size: 0.9rem; color: var(--color-ink); display: block;">' + v.name + '</strong>' +
+                '<span style="font-size: 0.72rem; color: var(--color-text-soft);">' + v.date + '</span>' +
+              '</div>' +
+              '<span style="font-size: 0.7rem; color: var(--color-text-soft); font-weight: 600; text-transform: uppercase; letter-spacing: 0.04em;">' + v.category + '</span>' +
+            '</div>';
+        });
+      }
+
+      var el = document.getElementById('dashboardContent');
+      el.innerHTML =
+        '<div class="placeholder-stat-grid" style="margin-bottom: 36px;">' +
+          '<div class="placeholder-stat" style="text-align: center;">' +
+            '<strong>' + visitados + '</strong>' +
+            '<span style="font-size: 0.78rem; color: var(--color-text-soft); text-transform: uppercase; letter-spacing: 0.04em; font-weight: 600;">Selos coletados</span>' +
+          '</div>' +
+          '<div class="placeholder-stat" style="text-align: center;">' +
+            '<strong>' + totalEst + '</strong>' +
+            '<span style="font-size: 0.78rem; color: var(--color-text-soft); text-transform: uppercase; letter-spacing: 0.04em; font-weight: 600;">Estabelecimentos</span>' +
+          '</div>' +
+          '<div class="placeholder-stat" style="text-align: center;">' +
+            '<strong>' + progresso + '%</strong>' +
+            '<span style="font-size: 0.78rem; color: var(--color-text-soft); text-transform: uppercase; letter-spacing: 0.04em; font-weight: 600;">Progresso</span>' +
+          '</div>' +
+        '</div>' +
+
+        '<div style="margin-bottom: 36px;">' +
+          '<div style="width: 100%; height: 14px; background: var(--color-surface); border: 1px solid var(--color-secondary); border-radius: 999px; overflow: hidden;">' +
+            '<div style="width: ' + progresso + '%; height: 100%; background: var(--color-primary); border-radius: 999px; transition: width 0.6s ease;"></div>' +
+          '</div>' +
+        '</div>' +
+
+        '<div style="display: grid; gap: 36px; grid-template-columns: 1fr;">' +
+          '<div style="min-width: 0;">' +
+            '<h3 style="font-family: \'Anybody\', cursive; font-size: 1.1rem; color: var(--color-secondary); margin: 0 0 14px; text-transform: uppercase;">Estabelecimentos</h3>' +
+            '<div style="overflow-x: auto;">' +
+              '<table style="width: 100%; border-collapse: collapse; background: rgba(255,255,255,0.92); border: 2px solid var(--color-secondary); font-size: 0.88rem;">' +
+                '<thead>' +
+                  '<tr style="background: var(--color-secondary); color: #fff; text-transform: uppercase; font-size: 0.72rem; letter-spacing: 0.04em;">' +
+                    '<th style="padding: 10px 8px; text-align: left; width: 32px;"></th>' +
+                    '<th style="padding: 10px 8px; text-align: left;">Estabelecimento</th>' +
+                    '<th style="padding: 10px 8px; text-align: left;">Categoria</th>' +
+                    '<th style="padding: 10px 8px; text-align: left;">Visitado em</th>' +
+                  '</tr>' +
+                '</thead>' +
+                '<tbody>' + rows + '</tbody>' +
+              '</table>' +
+            '</div>' +
+          '</div>' +
+
+          '<div style="min-width: 0;">' +
+            '<h3 style="font-family: \'Anybody\', cursive; font-size: 1.1rem; color: var(--color-secondary); margin: 0 0 14px; text-transform: uppercase;">Linha do tempo</h3>' +
+            '<div style="display: flex; flex-direction: column; gap: 10px;">' + timelineItems + '</div>' +
+          '</div>' +
+        '</div>';
+    }
+
+    renderDashboard();
+  </script>
+</body>
+</html>

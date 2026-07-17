@@ -1,0 +1,18 @@
+<svg width="800" height="600" viewBox="0 0 800 600" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <rect width="800" height="600" fill="#F6EFE2"/>
+  <rect width="800" height="180" fill="#CB2239"/>
+  <circle cx="680" cy="90" r="36" fill="#F0B116" opacity="0.3"/>
+  <circle cx="120" cy="90" r="52" fill="#F0B116" opacity="0.15"/>
+  <ellipse cx="400" cy="390" rx="280" ry="160" fill="#FFFDF7"/>
+  <ellipse cx="400" cy="390" rx="260" ry="140" fill="#F6EFE2"/>
+  <ellipse cx="400" cy="400" rx="180" ry="100" fill="#1A2F7B" opacity="0.08"/>
+  <circle cx="340" cy="370" r="40" fill="#CB2239"/>
+  <circle cx="460" cy="370" r="40" fill="#CB2239"/>
+  <circle cx="340" cy="370" r="24" fill="#F0B116"/>
+  <circle cx="460" cy="370" r="24" fill="#F0B116"/>
+  <ellipse cx="400" cy="450" rx="160" ry="14" fill="#CB2239" opacity="0.12"/>
+  <rect x="80" y="500" width="640" height="4" rx="2" fill="#1A2F7B" opacity="0.15"/>
+  <text x="120" y="564" fill="#1A2F7B" font-family="Be Vietnam Pro, Arial, sans-serif" font-size="40" font-weight="800">Casa da Orla</text>
+  <rect x="120" y="580" width="200" height="4" rx="2" fill="#CB2239"/>
+  <text x="540" y="556" fill="#F0B116" font-family="Be Vietnam Pro, Arial, sans-serif" font-size="18" font-weight="700">Restaurante</text>
+</svg>

@@ -1,0 +1,19 @@
+<svg width="800" height="600" viewBox="0 0 800 600" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <rect width="800" height="600" fill="#FEF3E2"/>
+  <rect width="800" height="180" fill="#F0B116"/>
+  <circle cx="680" cy="90" r="36" fill="#1A2F7B" opacity="0.2"/>
+  <circle cx="120" cy="90" r="52" fill="#1A2F7B" opacity="0.1"/>
+  <rect x="180" y="280" width="440" height="200" rx="32" fill="#FFFDF7" stroke="#CB2239" stroke-width="4"/>
+  <rect x="220" y="310" width="120" height="48" rx="24" fill="#CB2239"/>
+  <rect x="460" y="310" width="120" height="48" rx="24" fill="#1A2F7B"/>
+  <circle cx="340" cy="420" r="40" fill="#F6EFE2" stroke="#F0B116" stroke-width="4"/>
+  <circle cx="400" cy="420" r="40" fill="#F6EFE2" stroke="#CB2239" stroke-width="4"/>
+  <circle cx="460" cy="420" r="40" fill="#F6EFE2" stroke="#1A2F7B" stroke-width="4"/>
+  <circle cx="400" cy="420" r="18" fill="#F0B116"/>
+  <rect x="390" y="405" width="20" height="30" rx="4" fill="#FFFDF7"/>
+  <path d="M380 420 L400 410 L420 420" stroke="#FFFDF7" stroke-width="3" fill="none"/>
+  <rect x="80" y="500" width="640" height="4" rx="2" fill="#1A2F7B" opacity="0.15"/>
+  <text x="120" y="564" fill="#1A2F7B" font-family="Be Vietnam Pro, Arial, sans-serif" font-size="40" font-weight="800">Mercado dos Sabores</text>
+  <rect x="120" y="580" width="200" height="4" rx="2" fill="#CB2239"/>
+  <text x="510" y="556" fill="#CB2239" font-family="Be Vietnam Pro, Arial, sans-serif" font-size="18" font-weight="700">Cozinha rápida</text>
+</svg>

@@ -1,0 +1,157 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+  <title>Escanear QR · Rota Gastronômica Juá Literária 2026</title>
+  <meta name="description" content="Escaneie o QR code do estabelecimento para registrar sua visita na Rota Gastronômica Juá Literária 2026.">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Anybody:wght@600;700;800&family=Be+Vietnam+Pro:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="styles.css">
+  <script src="https://unpkg.com/html5-qrcode@2.3.8/html5-qrcode.min.js"></script>
+</head>
+<body class="scanner-page">
+  <main class="scanner-main">
+    <div class="scanner-top">
+      <button class="scanner-back" onclick="stopScanner()" aria-label="Voltar">
+        <span class="material-symbols-outlined">arrow_back</span>
+      </button>
+      <div class="scanner-title-area">
+        <h1 class="scanner-title">Escanear QR code</h1>
+        <p class="scanner-subtitle">Aponte para o QR code do estabelecimento</p>
+      </div>
+    </div>
+
+    <div class="scanner-view" id="scannerView">
+      <div class="scanner-loading" id="scannerLoading">
+        <span class="material-symbols-outlined" style="font-size: 3rem; color: var(--color-text-soft);">camera</span>
+        <p style="margin-top: 12px; font-weight: 600;">Ativando câmera...</p>
+        <p style="font-size: 0.85rem; color: var(--color-text-soft); margin-top: 4px;">Permita o acesso à câmera quando solicitado.</p>
+      </div>
+      <div id="qrReader" style="width: 100%; height: 100%;"></div>
+    </div>
+
+    <div class="scanner-error" id="scannerError" style="display: none;">
+      <span class="material-symbols-outlined" style="font-size: 3rem; color: var(--color-primary);">videocam_off</span>
+      <p style="font-weight: 600; margin-top: 8px;">Não foi possível acessar a câmera</p>
+      <p style="font-size: 0.85rem; color: var(--color-text-soft);">Digite o código do estabelecimento abaixo:</p>
+    </div>
+
+    <div class="scanner-bottom">
+      <div class="scanner-manual">
+        <label class="scanner-manual-label">Ou digite o código manualmente:</label>
+        <div class="scanner-manual-row">
+          <input type="text" id="scannerManualInput" placeholder="Ex: casa-da-orla" class="scanner-input">
+          <button class="button button-primary" onclick="manualGo()" style="flex-shrink: 0;">Ir</button>
+        </div>
+      </div>
+      <p class="scanner-hint">
+        <span class="material-symbols-outlined" style="font-size: 1rem; vertical-align: middle;">info</span>
+        O QR code está no estabelecimento. Se preferir, use a câmera nativa do celular.
+      </p>
+    </div>
+  </main>
+
+  <script>
+    var html5QrCode = null;
+    var isScanning = false;
+
+    function startScanner() {
+      if (typeof Html5Qrcode === 'undefined') {
+        showError('Biblioteca de leitura não carregada.');
+        return;
+      }
+
+      document.getElementById('scannerLoading').style.display = 'flex';
+      document.getElementById('scannerError').style.display = 'none';
+
+      html5QrCode = new Html5Qrcode("qrReader");
+
+      var config = {
+        fps: 15,
+        qrbox: { width: 260, height: 260 },
+        aspectRatio: 1.0
+      };
+
+      html5QrCode.start(
+        { facingMode: "environment" },
+        config,
+        onScanSuccess,
+        onScanFailure
+      ).then(function () {
+        isScanning = true;
+        document.getElementById('scannerLoading').style.display = 'none';
+      }).catch(function (err) {
+        showError(err);
+      });
+    }
+
+    function onScanSuccess(decodedText) {
+      if (!isScanning) return;
+      isScanning = false;
+
+      stopScanner();
+
+      var slug = extractSlug(decodedText);
+
+      if (slug) {
+        window.location.href = 'scan.html?slug=' + encodeURIComponent(slug);
+      } else {
+        window.location.href = 'scan.html?slug=' + encodeURIComponent(decodedText.trim().toLowerCase());
+      }
+    }
+
+    function onScanFailure(err) {
+      // ignore
+    }
+
+    function extractSlug(url) {
+      try {
+        var match = url.match(/[?&]slug=([^&]+)/);
+        if (match) { return decodeURIComponent(match[1]); }
+
+        match = url.match(/\/([^\/]+?)(?:\.html)?(?:\?|$)/);
+        if (match) { return match[1]; }
+
+        return null;
+      } catch (e) {
+        return null;
+      }
+    }
+
+    function stopScanner() {
+      if (html5QrCode) {
+        try {
+          html5QrCode.stop().catch(function () {});
+          html5QrCode.clear().catch(function () {});
+        } catch (e) {}
+        html5QrCode = null;
+      }
+      isScanning = false;
+      window.location.href = 'passaporte.html';
+    }
+
+    function showError(err) {
+      document.getElementById('scannerLoading').style.display = 'none';
+      document.getElementById('scannerError').style.display = 'flex';
+      document.getElementById('qrReader').style.display = 'none';
+    }
+
+    function manualGo() {
+      var input = document.getElementById('scannerManualInput');
+      var slug = input.value.trim().toLowerCase();
+      if (slug) {
+        window.location.href = 'scan.html?slug=' + encodeURIComponent(slug);
+      }
+    }
+
+    document.getElementById('scannerManualInput').addEventListener('keydown', function (e) {
+      if (e.key === 'Enter') { manualGo(); }
+    });
+
+    startScanner();
+  </script>
+</body>
+</html>

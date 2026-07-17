@@ -1,0 +1,18 @@
+<svg width="800" height="600" viewBox="0 0 800 600" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <rect width="800" height="600" fill="#EDF0E8"/>
+  <rect width="800" height="180" fill="#1A2F7B"/>
+  <circle cx="680" cy="90" r="36" fill="#F0B116" opacity="0.25"/>
+  <circle cx="120" cy="90" r="52" fill="#F0B116" opacity="0.12"/>
+  <ellipse cx="400" cy="420" rx="260" ry="130" fill="#FFFDF7"/>
+  <ellipse cx="400" cy="420" rx="240" ry="110" fill="#D4E0C8"/>
+  <ellipse cx="400" cy="430" rx="160" ry="60" fill="#1A2F7B" opacity="0.06"/>
+  <path d="M240 370 Q320 300 400 370 Q480 300 560 370" stroke="#CB2239" stroke-width="6" fill="none"/>
+  <path d="M260 400 Q340 340 400 400 Q460 340 540 400" stroke="#F0B116" stroke-width="4" fill="none"/>
+  <circle cx="300" cy="450" r="18" fill="#CB2239"/>
+  <circle cx="400" cy="460" r="18" fill="#F0B116"/>
+  <circle cx="500" cy="450" r="18" fill="#1A2F7B"/>
+  <rect x="80" y="500" width="640" height="4" rx="2" fill="#1A2F7B" opacity="0.15"/>
+  <text x="120" y="564" fill="#1A2F7B" font-family="Be Vietnam Pro, Arial, sans-serif" font-size="40" font-weight="800">Quintal do Velho Chico</text>
+  <rect x="120" y="580" width="200" height="4" rx="2" fill="#CB2239"/>
+  <text x="540" y="556" fill="#F0B116" font-family="Be Vietnam Pro, Arial, sans-serif" font-size="18" font-weight="700">Bistro</text>
+</svg>

@@ -1,0 +1,348 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Mapa · Rota Gastronômica Juá Literária 2026</title>
+  <meta name="description" content="Mapa interativo da Rota Gastronômica Juá Literária 2026. Explore os estabelecimentos participantes próximos ao evento.">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Anybody:wght@600;700;800&family=Be+Vietnam+Pro:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://unpkg.com/maplibre-gl@4/dist/maplibre-gl.css">
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body class="map-body">
+  <header class="site-header">
+    <div class="container header-shell">
+      <a class="wordmark" href="index.html" aria-label="Página inicial da rota"><img src="assets/logo-jua-literaria.png" alt="Rota Gastronômica Juá Literária 2026"></a>
+      <nav class="desktop-nav" aria-label="Principal">
+        <a class="is-active" href="mapa.html">Mapa</a>
+        <a href="restaurantes.html">Restaurantes</a>
+        <a href="index.html#como-funciona">Como funciona</a>
+        <a href="passaporte.html">Passaporte</a>
+      </nav>
+    </div>
+  </header>
+
+  <main class="map-area">
+    <div id="map"></div>
+
+    <div class="map-overlay">
+      <div class="search-box">
+        <div class="search-group">
+          <span class="material-symbols-outlined">search</span>
+          <input type="text" id="searchInput" placeholder="Buscar locais, pratos..." aria-label="Buscar estabelecimentos">
+          <button class="search-tune" aria-label="Filtrar">
+            <span class="material-symbols-outlined">tune</span>
+          </button>
+        </div>
+      </div>
+
+      <div class="filter-row" id="filterRow">
+        <button class="filter-chip is-active" data-filter="Todos">Todos</button>
+        <button class="filter-chip" data-filter="Restaurante">
+          <span class="material-symbols-outlined">restaurant</span>
+          Restaurantes
+        </button>
+        <button class="filter-chip" data-filter="Cafe">
+          <span class="material-symbols-outlined">local_cafe</span>
+          Cafés
+        </button>
+        <button class="filter-chip" data-filter="Sobremesas">
+          <span class="material-symbols-outlined">cake</span>
+          Docerias
+        </button>
+        <button class="filter-chip" data-filter="Bistro">
+          <span class="material-symbols-outlined">wine_bar</span>
+          Bistrôs
+        </button>
+        <button class="filter-chip" data-filter="Cozinha rapida">
+          <span class="material-symbols-outlined">fastfood</span>
+          Rápidas
+        </button>
+      </div>
+
+      <div class="fab-corner">
+        <button class="fab-btn" id="fabCenter" aria-label="Centralizar mapa">
+          <span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">my_location</span>
+        </button>
+      </div>
+
+      <div class="map-sheet" id="bottomSheet">
+        <div class="sheet-grip" onclick="toggleSheet()">
+          <div class="sheet-grip-bar"></div>
+        </div>
+        <div class="sheet-title">
+          <h2>
+            <span class="material-symbols-outlined" style="color: var(--color-primary);">near_me</span>
+            Perto de Você
+          </h2>
+          <p>Descubra estabelecimentos ao seu redor na rota</p>
+        </div>
+        <div class="sheet-items" id="sheetItems">
+          <div id="sheetCards"></div>
+          <div class="empty-state" id="emptyResult" style="display: none;">
+            <span class="material-symbols-outlined" style="font-size: 2rem; color: var(--color-text-soft);">search_off</span>
+            <p style="margin: 8px 0 0; font-weight: 600;">Nenhum estabelecimento encontrado</p>
+            <p style="margin: 4px 0 0; font-size: 0.85rem; color: var(--color-text-soft);">Tente outro termo ou limpe os filtros</p>
+          </div>
+          <div class="loading-state" id="loadingState">
+            <span class="material-symbols-outlined" style="font-size: 2rem; color: var(--color-text-soft);">search</span>
+            <p style="margin: 8px 0 0; font-weight: 600;">Carregando estabelecimentos...</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </main>
+
+  <nav class="mobile-nav" aria-label="Navegação inferior">
+    <a href="index.html">
+      <span class="material-symbols-outlined nav-icon">home</span>
+      Início
+    </a>
+    <a class="is-active" href="mapa.html">
+      <span class="material-symbols-outlined nav-icon">map</span>
+      Mapa
+    </a>
+    <a href="passaporte.html">
+      <span class="material-symbols-outlined nav-icon">auto_stories</span>
+      Passaporte
+    </a>
+  </nav>
+
+  <script src="https://unpkg.com/maplibre-gl@4/dist/maplibre-gl.js"></script>
+  <script>
+    var MAP_CENTER = [-40.500, -9.414];
+    var MAP_ZOOM = 13.5;
+
+    var map;
+    var markerItems = [];
+    var sheetOpen = false;
+    var activeFilter = 'Todos';
+
+    function getCategoryIcon(cat) {
+      var icons = {
+        'Restaurante': 'restaurant',
+        'Cafe': 'local_cafe',
+        'Bistro': 'wine_bar',
+        'Cozinha rapida': 'fastfood',
+        'Sobremesas': 'cake'
+      };
+      return icons[cat] || 'restaurant';
+    }
+
+    function getCategoryStyle(cat) {
+      var styles = {
+        'Restaurante': 'style-primary',
+        'Cafe': 'style-secondary',
+        'Bistro': 'style-tertiary',
+        'Cozinha rapida': 'style-primary',
+        'Sobremesas': 'style-secondary'
+      };
+      return styles[cat] || 'style-primary';
+    }
+
+    function initMap() {
+      map = new maplibregl.Map({
+        container: 'map',
+        style: 'https://tiles.openfreemap.org/styles/liberty',
+        center: MAP_CENTER,
+        zoom: MAP_ZOOM,
+        attributionControl: false
+      });
+
+      map.addControl(new maplibregl.AttributionControl({ compact: true }));
+
+      map.on('load', function () {
+        loadEstablishments();
+      });
+    }
+
+    function loadEstablishments() {
+      fetch('data/estabelecimentos.json')
+        .then(function (r) { return r.json(); })
+        .then(function (data) {
+          data.forEach(function (est) {
+            addMarkerToMap(est);
+          });
+          renderSheetItems(data);
+          setupFilters(data);
+        })
+        .catch(function () {
+          document.getElementById('loadingState').style.display = 'none';
+          document.getElementById('sheetCards').innerHTML =
+            '<div class="empty-state"><p style="font-weight: 600; color: var(--color-primary);">Erro ao carregar dados</p></div>';
+        });
+    }
+
+    function addMarkerToMap(est) {
+      var el = document.createElement('div');
+      el.className = 'map-marker';
+      el.innerHTML =
+        '<div class="marker-icon ' + getCategoryStyle(est.category) + '">' +
+          '<span class="material-symbols-outlined">' + getCategoryIcon(est.category) + '</span>' +
+        '</div>' +
+        '<div class="marker-label">' + est.name + '</div>';
+
+      el.addEventListener('click', function () {
+        flyToEstablishment(est);
+        if (!sheetOpen) { toggleSheet(); }
+        highlightSheetItem(est.id);
+      });
+
+      var marker = new maplibregl.Marker({ element: el })
+        .setLngLat([est.lng, est.lat])
+        .addTo(map);
+
+      markerItems.push({ marker: marker, data: est });
+    }
+
+    function flyToEstablishment(est) {
+      map.flyTo({ center: [est.lng, est.lat], zoom: 15, duration: 800 });
+    }
+
+    function renderSheetItems(data) {
+      var cardsContainer = document.getElementById('sheetCards');
+      document.getElementById('loadingState').style.display = 'none';
+      var html = '';
+
+      data.forEach(function (est) {
+        html +=
+          '<div class="nearby-card" data-id="' + est.id + '" onclick="onSheetCardClick(' + est.id + ')">' +
+            '<div class="nearby-img">' +
+              '<span class="material-symbols-outlined">' + getCategoryIcon(est.category) + '</span>' +
+            '</div>' +
+            '<div class="nearby-detail">' +
+              '<h3>' + est.name + '</h3>' +
+              '<div class="nearby-badges">' +
+                '<span class="nearby-badge">' + est.category + '</span>' +
+              '</div>' +
+              '<div class="nearby-meta">' +
+                '<span class="material-symbols-outlined">location_on</span>' +
+                est.neighborhood +
+              '</div>' +
+              '<a href="estabelecimento.html?slug=' + est.slug + '" class="inline-link" style="font-size: 0.72rem; margin-top: 6px; display: inline-flex; align-items: center; gap: 4px;" onclick="event.stopPropagation()">' +
+                '<span class="material-symbols-outlined" style="font-size: 0.85rem;">open_in_new</span>Detalhes' +
+              '</a>' +
+            '</div>' +
+          '</div>';
+      });
+
+      cardsContainer.innerHTML = html;
+    }
+
+    function onSheetCardClick(id) {
+      var item = markerItems.find(function (m) { return m.data.id === id; });
+      if (item) {
+        flyToEstablishment(item.data);
+        highlightSheetItem(id);
+      }
+    }
+
+    function highlightSheetItem(id) {
+      var cards = document.querySelectorAll('.nearby-card');
+      cards.forEach(function (c) {
+        c.style.borderColor = '';
+        c.style.background = '';
+      });
+      var target = document.querySelector('.nearby-card[data-id="' + id + '"]');
+      if (target) {
+        target.style.borderColor = 'var(--color-accent)';
+        target.style.background = 'rgba(240, 177, 22, 0.08)';
+        target.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+      }
+    }
+
+    function setupFilters(data) {
+      var chips = document.querySelectorAll('.filter-chip');
+
+      chips.forEach(function (chip) {
+        chip.addEventListener('click', function () {
+          chips.forEach(function (c) { c.classList.remove('is-active'); });
+          chip.classList.add('is-active');
+
+          var category = chip.getAttribute('data-filter');
+          activeFilter = category;
+
+          applyFilters(data);
+        });
+      });
+
+      var searchInput = document.getElementById('searchInput');
+      searchInput.addEventListener('input', function () {
+        applyFilters(data);
+      });
+    }
+
+    function applyFilters(data) {
+      var query = document.getElementById('searchInput').value.toLowerCase().trim();
+      var categoryFilter = activeFilter;
+      var anyVisible = false;
+
+      markerItems.forEach(function (item) {
+        var est = item.data;
+        var searchMatch = query === '' || est.name.toLowerCase().includes(query) || est.specialDish.toLowerCase().includes(query);
+        var catMatch = categoryFilter === 'Todos' || est.category === categoryFilter;
+        var visible = searchMatch && catMatch;
+        item.marker.getElement().style.display = visible ? '' : 'none';
+        if (visible) { anyVisible = true; }
+      });
+
+      var cards = document.querySelectorAll('#sheetCards .nearby-card');
+      cards.forEach(function (card) {
+        var id = parseInt(card.getAttribute('data-id'));
+        var est = data.find(function (e) { return e.id === id; });
+        if (!est) return;
+        var searchMatch = query === '' || est.name.toLowerCase().includes(query) || est.specialDish.toLowerCase().includes(query);
+        var catMatch = categoryFilter === 'Todos' || est.category === categoryFilter;
+        var visible = searchMatch && catMatch;
+        card.style.display = visible ? '' : 'none';
+      });
+
+      var emptyState = document.getElementById('emptyResult');
+      if (emptyState) {
+        emptyState.style.display = anyVisible ? 'none' : 'flex';
+      }
+    }
+
+    function toggleSheet() {
+      var sheet = document.getElementById('bottomSheet');
+
+      if (sheetOpen) {
+        sheet.style.transform = 'translateY(60%)';
+        sheetOpen = false;
+      } else {
+        sheet.style.transform = 'translateY(0)';
+        sheetOpen = true;
+      }
+    }
+
+    function initSheet() {
+      var sheet = document.getElementById('bottomSheet');
+      if (sheet) {
+        sheet.style.transform = 'translateY(50%)';
+        sheetOpen = false;
+      }
+    }
+
+    document.getElementById('fabCenter').addEventListener('click', function () {
+      if ('geolocation' in navigator) {
+        navigator.geolocation.getCurrentPosition(
+          function (pos) {
+            map.flyTo({ center: [pos.coords.longitude, pos.coords.latitude], zoom: 15, duration: 800 });
+          },
+          function () {
+            map.flyTo({ center: MAP_CENTER, zoom: MAP_ZOOM, duration: 800 });
+          }
+        );
+      } else {
+        map.flyTo({ center: MAP_CENTER, zoom: MAP_ZOOM, duration: 800 });
+      }
+    });
+
+    setTimeout(initSheet, 400);
+    initMap();
+  </script>
+</body>
+</html>

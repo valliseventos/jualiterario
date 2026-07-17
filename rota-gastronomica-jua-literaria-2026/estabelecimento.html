@@ -1,0 +1,502 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title id="pageTitle">Estabelecimento · Rota Gastronômica Juá Literária 2026</title>
+  <meta name="description" content="Detalhes do estabelecimento na Rota Gastronômica Juá Literária 2026.">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Anybody:wght@600;700;800&family=Be+Vietnam+Pro:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://unpkg.com/maplibre-gl@4/dist/maplibre-gl.css">
+  <link rel="stylesheet" href="styles.css">
+  <style>
+    .detail-page main {
+      padding: 0 0 120px;
+    }
+
+    .detail-hero {
+      position: relative;
+      padding: 40px 0;
+      background: var(--color-secondary);
+      color: #fff;
+      text-align: center;
+      margin-bottom: 32px;
+    }
+
+    .detail-hero h1 {
+      margin: 0;
+      font-family: 'Anybody', cursive;
+      font-size: clamp(2rem, 6vw, 3.2rem);
+      font-weight: 800;
+      color: #fff;
+      text-transform: uppercase;
+      line-height: 0.98;
+    }
+
+    .detail-hero-meta {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: center;
+      gap: 12px;
+      margin-top: 16px;
+    }
+
+    .detail-hero-chip {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 6px 14px;
+      background: rgba(255,255,255,0.12);
+      border: 1px solid rgba(255,255,255,0.25);
+      font-size: 0.78rem;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+    }
+
+    .detail-hero-chip .material-symbols-outlined {
+      font-size: 1rem;
+    }
+
+    .detail-back {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      margin-bottom: 20px;
+      font-size: 0.85rem;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+      color: rgba(255,255,255,0.7);
+      cursor: pointer;
+      transition: color 120ms ease;
+    }
+
+    .detail-back:hover {
+      color: #fff;
+    }
+
+    .detail-body {
+      display: grid;
+      gap: 32px;
+    }
+
+    .detail-card {
+      padding: 24px 22px;
+      background: rgba(255,255,255,0.92);
+      border: 2px solid var(--color-secondary);
+      box-shadow: var(--shadow-hard);
+    }
+
+    .detail-card h2 {
+      font-family: 'Anybody', cursive;
+      font-size: 1.2rem;
+      font-weight: 800;
+      color: var(--color-secondary);
+      text-transform: uppercase;
+      margin: 0 0 14px;
+    }
+
+    .detail-dish {
+      display: flex;
+      align-items: flex-start;
+      gap: 14px;
+      padding: 16px;
+      background: rgba(240, 177, 22, 0.08);
+      border: 1px solid rgba(26, 47, 123, 0.15);
+      margin-bottom: 16px;
+    }
+
+    .detail-dish-icon {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      width: 48px;
+      height: 48px;
+      background: var(--color-accent);
+      border: 2px solid var(--color-secondary);
+      flex-shrink: 0;
+    }
+
+    .detail-dish-icon .material-symbols-outlined {
+      font-size: 1.3rem;
+      color: var(--color-secondary);
+      font-variation-settings: 'FILL' 1;
+    }
+
+    .detail-dish h3 {
+      margin: 0;
+      font-family: 'Anybody', cursive;
+      font-size: 0.95rem;
+      color: var(--color-secondary);
+    }
+
+    .detail-dish p {
+      margin: 4px 0 0;
+      font-size: 0.88rem;
+      color: var(--color-text-soft);
+    }
+
+    .detail-price {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 8px 16px;
+      background: var(--color-secondary);
+      color: #fff;
+      font-family: 'Anybody', cursive;
+      font-size: 1.1rem;
+      font-weight: 700;
+    }
+
+    .detail-desc {
+      font-size: 0.95rem;
+      color: var(--color-text-soft);
+      line-height: 1.7;
+      margin: 0 0 16px;
+    }
+
+    .detail-map-wrap {
+      overflow: hidden;
+      border: 2px solid var(--color-secondary);
+      box-shadow: var(--shadow-hard);
+    }
+
+    .detail-map-wrap #estMap {
+      width: 100%;
+      height: 280px;
+    }
+
+    .detail-visit-status {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 16px 20px;
+      border: 2px solid var(--color-secondary);
+      margin-bottom: 20px;
+    }
+
+    .detail-visit-status.visited {
+      background: rgba(240, 177, 22, 0.08);
+    }
+
+    .detail-visit-status.not-visited {
+      background: rgba(255,255,255,0.92);
+    }
+
+    .detail-visit-status .material-symbols-outlined {
+      font-size: 1.6rem;
+    }
+
+    .detail-visit-status.visited .material-symbols-outlined {
+      color: var(--color-primary);
+      font-variation-settings: 'FILL' 1;
+    }
+
+    .detail-visit-status.not-visited .material-symbols-outlined {
+      color: var(--color-text-soft);
+    }
+
+    .detail-visit-text {
+      flex: 1;
+    }
+
+    .detail-visit-text strong {
+      display: block;
+      font-family: 'Anybody', cursive;
+      font-size: 0.95rem;
+      color: var(--color-ink);
+    }
+
+    .detail-visit-text span {
+      display: block;
+      font-size: 0.8rem;
+      color: var(--color-text-soft);
+      margin-top: 2px;
+    }
+
+    .detail-actions {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 12px;
+    }
+
+    .detail-actions .button {
+      flex: 1;
+      min-width: 160px;
+    }
+
+    .detail-not-found {
+      text-align: center;
+      padding: 80px 20px;
+    }
+
+    .detail-not-found .material-symbols-outlined {
+      font-size: 4rem;
+      color: var(--color-text-soft);
+    }
+
+    .detail-not-found h1 {
+      font-family: 'Anybody', cursive;
+      font-size: clamp(1.6rem, 4vw, 2.4rem);
+      color: var(--color-secondary);
+      margin: 12px 0 4px;
+    }
+
+    .detail-not-found p {
+      color: var(--color-text-soft);
+      margin: 0 0 24px;
+    }
+
+    @media (min-width: 720px) {
+      .detail-body {
+        grid-template-columns: 1fr 1fr;
+      }
+
+      .detail-full {
+        grid-column: 1 / -1;
+      }
+
+      .detail-map-wrap #estMap {
+        height: 340px;
+      }
+    }
+
+    @media (min-width: 960px) {
+      .detail-page main {
+        padding-bottom: 52px;
+      }
+    }
+  </style>
+</head>
+<body class="detail-page">
+  <header class="site-header">
+    <div class="container header-shell">
+      <a class="wordmark" href="index.html" aria-label="Página inicial da rota"><img src="assets/logo-jua-literaria.png" alt="Rota Gastronômica Juá Literária 2026"></a>
+      <nav class="desktop-nav" aria-label="Principal">
+        <a href="mapa.html">Mapa</a>
+        <a href="restaurantes.html">Restaurantes</a>
+        <a href="passaporte.html">Passaporte</a>
+      </nav>
+    </div>
+  </header>
+
+  <main>
+    <div id="detailContent"></div>
+  </main>
+
+  <nav class="mobile-nav" aria-label="Navegação inferior">
+    <a href="index.html">
+      <span class="material-symbols-outlined nav-icon">home</span>
+      Início
+    </a>
+    <a href="mapa.html">
+      <span class="material-symbols-outlined nav-icon">map</span>
+      Mapa
+    </a>
+    <a href="passaporte.html">
+      <span class="material-symbols-outlined nav-icon">auto_stories</span>
+      Passaporte
+    </a>
+  </nav>
+
+  <script src="app-state.js"></script>
+  <script src="https://unpkg.com/maplibre-gl@4/dist/maplibre-gl.js"></script>
+  <script>
+    var ESTABELECIMENTOS = [
+      {"id":1,"slug":"casa-da-orla","name":"Casa da Orla","category":"Restaurante","priceLabel":"R$ 58","specialDish":"Arroz de panela com carne de sol e creme de abóbora","description":"Um ponto de encontro voltado para almoços demorados, conversa e cozinha regional com leitura contemporânea.","neighborhood":"Orla I","image":"assets/estabelecimento-1.svg","featured":true,"lat":-9.4150,"lng":-40.5030},
+      {"id":2,"slug":"cafe-da-ponte","name":"Cafe da Ponte","category":"Cafe","priceLabel":"R$ 24","specialDish":"Bolo de milho tostado com creme de queijo e café gelado","description":"Ambiente leve e urbano, pensado para pausas rápidas entre uma atividade do festival e outra.","neighborhood":"Centro","image":"assets/estabelecimento-2.svg","featured":true,"lat":-9.4080,"lng":-40.4970},
+      {"id":3,"slug":"quintal-do-velho-chico","name":"Quintal do Velho Chico","category":"Bistro","priceLabel":"R$ 67","specialDish":"Peixe grelhado com purê de macaxeira e farofa de castanhas","description":"Uma experiência mais calma, com quintal sombreado, pratos quentes e clima de fim de tarde.","neighborhood":"Orla II","image":"assets/estabelecimento-3.svg","featured":true,"lat":-9.4200,"lng":-40.5080},
+      {"id":4,"slug":"mercado-dos-sabores","name":"Mercado dos Sabores","category":"Cozinha rapida","priceLabel":"R$ 31","specialDish":"Sanduíche regional com queijo coalho, melão e melão de rapadura","description":"Parada agitada da rota, com serviço rápido, visual vibrante e proposta pensada para circular.","neighborhood":"Centro","image":"assets/estabelecimento-4.svg","featured":true,"lat":-9.4100,"lng":-40.4950},
+      {"id":5,"slug":"varanda-do-sertao","name":"Varanda do Sertao","category":"Restaurante","priceLabel":"R$ 52","specialDish":"Galinhada cremosa com picles de maxixe","description":"Comida afetiva e atmosfera familiar para quem deseja prolongar o passeio pela rota.","neighborhood":"Santo Antonio","image":"assets/estabelecimento-5.svg","featured":false,"lat":-9.4030,"lng":-40.4880},
+      {"id":6,"slug":"atelier-doce","name":"Atelier Doce","category":"Sobremesas","priceLabel":"R$ 22","specialDish":"Cartola reinterpretada com mel de umbu","description":"Pequena casa de doces e café, ideal para encerrar o circuito com uma última parada.","neighborhood":"Centro","image":"assets/estabelecimento-6.svg","featured":false,"lat":-9.4120,"lng":-40.4920}
+    ];
+
+    function getCategoryIcon(cat) {
+      var map = { 'Restaurante': 'restaurant', 'Cafe': 'local_cafe', 'Bistro': 'wine_bar', 'Cozinha rapida': 'fastfood', 'Sobremesas': 'cake' };
+      return map[cat] || 'restaurant';
+    }
+
+    function getCategoryStyle(cat) {
+      var map = { 'Restaurante': 'style-primary', 'Cafe': 'style-secondary', 'Bistro': 'style-tertiary', 'Cozinha rapida': 'style-primary', 'Sobremesas': 'style-secondary' };
+      return map[cat] || 'style-primary';
+    }
+
+    function getCategoryLabel(cat) {
+      var map = { 'Restaurante': 'Restaurante', 'Cafe': 'Café', 'Bistro': 'Bistrô', 'Cozinha rapida': 'Cozinha Rápida', 'Sobremesas': 'Sobremesas' };
+      return map[cat] || cat;
+    }
+
+    function getNeighborhoodIcon(hood) {
+      if (hood && hood.toLowerCase().indexOf('orla') !== -1) return 'water';
+      return 'location_city';
+    }
+
+    function renderDetail() {
+      var params = new URLSearchParams(window.location.search);
+      var slug = params.get('slug');
+      var target = document.getElementById('detailContent');
+
+      if (!slug) {
+        renderNotFound(target, 'Nenhum estabelecimento informado.');
+        return;
+      }
+
+      var est = null;
+      for (var i = 0; i < ESTABELECIMENTOS.length; i++) {
+        if (ESTABELECIMENTOS[i].slug === slug) { est = ESTABELECIMENTOS[i]; break; }
+      }
+
+      if (!est) {
+        renderNotFound(target, 'Estabelecimento não encontrado.');
+        return;
+      }
+
+      document.getElementById('pageTitle').textContent = est.name + ' · Rota Gastronômica Juá Literária 2026';
+
+      var visitado = isVisitado(slug);
+      var visita = getVisitaPorSlug(slug);
+      var contagem = getContagem();
+      var total = ESTABELECIMENTOS.length;
+
+      target.innerHTML =
+        '<div class="detail-hero">' +
+          '<div class="container">' +
+            '<a class="detail-back" href="javascript:history.back()">' +
+              '<span class="material-symbols-outlined" style="font-size: 1.1rem;">arrow_back</span>Voltar' +
+            '</a>' +
+            '<h1>' + est.name + '</h1>' +
+            '<div class="detail-hero-meta">' +
+              '<span class="detail-hero-chip">' +
+                '<span class="material-symbols-outlined">' + getCategoryIcon(est.category) + '</span>' +
+                getCategoryLabel(est.category) +
+              '</span>' +
+              '<span class="detail-hero-chip">' +
+                '<span class="material-symbols-outlined">' + getNeighborhoodIcon(est.neighborhood) + '</span>' +
+                est.neighborhood +
+              '</span>' +
+              '<span class="detail-hero-chip">' +
+                '<span class="material-symbols-outlined">payments</span>' +
+                est.priceLabel +
+              '</span>' +
+            '</div>' +
+          '</div>' +
+        '</div>' +
+
+        '<div class="container">' +
+          '<div class="detail-body">' +
+
+            '<div class="detail-card">' +
+              '<div class="detail-visit-status ' + (visitado ? 'visited' : 'not-visited') + '">' +
+                '<span class="material-symbols-outlined">' + (visitado ? 'check_circle' : 'radio_button_unchecked') + '</span>' +
+                '<div class="detail-visit-text">' +
+                  '<strong>' + (visitado ? 'Você visitou este local' : 'Você ainda não visitou') + '</strong>' +
+                  '<span>' + (visitado ? 'Registrado em ' + visita.date : 'Escaneeie o QR code no estabelecimento') + '</span>' +
+                '</div>' +
+              '</div>' +
+              '<h2>Sobre</h2>' +
+              '<p class="detail-desc">' + est.description + '</p>' +
+              '<div class="detail-dish">' +
+                '<div class="detail-dish-icon">' +
+                  '<span class="material-symbols-outlined">restaurant</span>' +
+                '</div>' +
+                '<div>' +
+                  '<h3>Prato especial</h3>' +
+                  '<p>' + est.specialDish + '</p>' +
+                '</div>' +
+              '</div>' +
+              '<div class="detail-price">' +
+                '<span class="material-symbols-outlined" style="font-size: 1.1rem;">sell</span>' +
+                est.priceLabel +
+              '</div>' +
+            '</div>' +
+
+            '<div class="detail-card">' +
+              '<h2>Localização</h2>' +
+              '<p style="font-size: 0.9rem; color: var(--color-text-soft); margin: 0 0 12px;">' +
+                '<span class="material-symbols-outlined" style="font-size: 1rem; vertical-align: middle;">location_on</span> ' +
+                est.neighborhood +
+              '</p>' +
+              '<div class="detail-map-wrap">' +
+                '<div id="estMap"></div>' +
+              '</div>' +
+            '</div>' +
+
+            '<div class="detail-card detail-full">' +
+              '<h2>Seu passaporte</h2>' +
+              '<div style="display: flex; align-items: center; gap: 12px; padding: 16px; background: rgba(240, 177, 22, 0.06); border: 1px solid rgba(26,47,123,0.1);">' +
+                '<span class="material-symbols-outlined" style="font-size: 1.6rem; color: var(--color-primary); font-variation-settings: \'FILL\' 1;">auto_stories</span>' +
+                '<div style="flex: 1;">' +
+                  '<strong style="font-family: \'Anybody\', cursive; font-size: 1rem; color: var(--color-secondary);">' + contagem + ' de ' + total + ' selos</strong>' +
+                  '<div style="width: 100%; height: 8px; background: var(--color-surface); border: 1px solid var(--color-secondary); border-radius: 999px; overflow: hidden; margin-top: 6px;">' +
+                    '<div style="width: ' + (total > 0 ? Math.round((contagem / total) * 100) : 0) + '%; height: 100%; background: var(--color-primary); border-radius: 999px; transition: width 0.6s ease;"></div>' +
+                  '</div>' +
+                '</div>' +
+              '</div>' +
+              '<div class="detail-actions" style="margin-top: 18px;">' +
+                '<a class="button button-primary" href="scan.html?slug=' + est.slug + '">' +
+                  '<span class="material-symbols-outlined button-icon">qr_code_scanner</span>Registrar visita' +
+                '</a>' +
+                '<a class="button button-secondary" href="passaporte.html">' +
+                  '<span class="material-symbols-outlined button-icon">auto_stories</span>Ver passaporte' +
+                '</a>' +
+                '<a class="button button-secondary" href="mapa.html">' +
+                  '<span class="material-symbols-outlined button-icon">map</span>Ver no mapa' +
+                '</a>' +
+              '</div>' +
+            '</div>' +
+
+          '</div>' +
+        '</div>';
+
+      if (est.lat && est.lng) {
+        setTimeout(function () {
+          try {
+            var map = new maplibregl.Map({
+              container: 'estMap',
+              style: 'https://tiles.openfreemap.org/styles/liberty',
+              center: [est.lng, est.lat],
+              zoom: 15,
+              attributionControl: false,
+              interactive: true
+            });
+            map.addControl(new maplibregl.AttributionControl({ compact: true }));
+
+            var el = document.createElement('div');
+            el.className = 'map-marker';
+            el.innerHTML =
+              '<div class="marker-icon ' + getCategoryStyle(est.category) + '">' +
+                '<span class="material-symbols-outlined">' + getCategoryIcon(est.category) + '</span>' +
+              '</div>' +
+              '<div class="marker-label">' + est.name + '</div>';
+
+            new maplibregl.Marker({ element: el })
+              .setLngLat([est.lng, est.lat])
+              .addTo(map);
+
+            map.on('load', function () {
+              map.resize();
+            });
+          } catch (e) {}
+        }, 100);
+      }
+    }
+
+    function renderNotFound(target, msg) {
+      target.innerHTML =
+        '<div class="detail-not-found">' +
+          '<span class="material-symbols-outlined">search_off</span>' +
+          '<h1>Estabelecimento não encontrado</h1>' +
+          '<p>' + msg + '</p>' +
+          '<a class="button button-primary" href="restaurantes.html">' +
+            '<span class="material-symbols-outlined button-icon">restaurant_menu</span>Ver todos' +
+          '</a>' +
+        '</div>';
+    }
+
+    renderDetail();
+  </script>
+</body>
+</html>
