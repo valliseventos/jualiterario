@@ -14,9 +14,9 @@
     "hours": "",
     "image": "https://lh3.googleusercontent.com/gps-cs-s/AHRPTWmm9muSbrS5_EoaZvLP2f9LxIa6uhNeWaFz_u3JOxc9dX8kiZmZXfxrF4EevzxFLzNS--GdCRY2AhybKH3hv77OhtpUTkVl_Q0TNO1nkX6aN3flnFr1ekRFhqU3s98bpI65OCKxEBMWmQZi=s680-w680-h510-rw",
     "featured": true,
-    "lat": -9.4141581,
-    "lng": -40.5109149,
-    "coordinatesStatus": "low-confidence"
+    "lat": -9.409185760541076,
+    "lng": -40.50902223944303,
+    "coordinatesStatus": "verified"
   },
   {
     "id": 2,
@@ -71,9 +71,9 @@
     "hours": "",
     "image": "https://lh3.googleusercontent.com/gps-cs-s/AHRPTWlByj0jxb_FeXCGfLNMDsyHQSynFBoUGtxjHdmSc41FlDa50UE_GMHVN5LqSXe7_hPlkCnV8fzHR4uHM6SBWM22rdbYiUNKLjs71qeuLlYA735_yYZ0FrCWuPggbc4CdRuHZ3iFAvV7gFi_=s680-w680-h510-rw",
     "featured": true,
-    "lat": -9.4095503,
-    "lng": -40.5052267,
-    "coordinatesStatus": "approximate"
+    "lat": -9.409054586752125,
+    "lng": -40.50803285412825,
+    "coordinatesStatus": "verified"
   },
   {
     "id": 5,
@@ -337,9 +337,9 @@
     "hours": "",
     "image": "https://lh3.googleusercontent.com/gps-cs-s/AHRPTWn9zmD7tNZDPV1YVQDi8c-NO_Di4GaD0p-lyZCWDyNdEcZwWjEM8qxEWyV_ubls_4gf1jmYeyi84rc7DRtdeezW7O2YhDNNNsy7l0kWeNLXBCEg9H09Nmfy5YXhfzb964Kf8wKxvgh8TTde=s680-w680-h510-rw",
     "featured": false,
-    "lat": -9.4099804,
-    "lng": -40.5039778,
-    "coordinatesStatus": "approximate"
+    "lat": -9.409013092253684,
+    "lng": -40.50820953440947,
+    "coordinatesStatus": "verified"
   },
   {
     "id": 19,
