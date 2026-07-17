@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Comece sua jornada · Rota Gastronômica Juá Literária 2026</title>
+  <meta name="description" content="Informe seu nome para acessar o passaporte digital da Rota Gastronômica Juá Literária 2026.">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Anybody:wght@600;700;800&family=Be+Vietnam+Pro:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body class="capture-page">
+  <main class="capture-main">
+    <section class="capture-card" aria-labelledby="captureTitle">
+      <img class="capture-logo" src="assets/logo-jua-literaria.png" alt="Juá Literária">
+      <h1 id="captureTitle">Inicie sua jornada</h1>
+      <p class="capture-intro">Informe seu nome para colecionar selos, explorar sabores e registrar sua história no festival.</p>
+
+      <form id="participantForm" novalidate>
+        <label class="capture-label" for="participantName">Nome completo</label>
+        <div class="capture-input-wrap">
+          <span class="material-symbols-outlined">person</span>
+          <input id="participantName" name="name" type="text" autocomplete="name" placeholder="Seu nome e sobrenome" required>
+        </div>
+        <p class="capture-error" id="captureError" role="alert"></p>
+        <button class="button button-primary capture-submit" type="submit">
+          <span class="material-symbols-outlined button-icon">auto_stories</span>
+          Criar meu passaporte
+        </button>
+      </form>
+    </section>
+  </main>
+
+  <script src="app-state.js"></script>
+  <script>
+    var form = document.getElementById('participantForm');
+    var input = document.getElementById('participantName');
+    var error = document.getElementById('captureError');
+    var currentName = getParticipantName();
+
+    if (currentName) input.value = currentName;
+
+    form.addEventListener('submit', function (event) {
+      event.preventDefault();
+      var name = input.value.trim().replace(/\s+/g, ' ');
+      var parts = name.split(' ');
+
+      if (parts.length < 2 || parts.some(function (part) { return part.length < 2; })) {
+        error.textContent = 'Informe seu nome e sobrenome.';
+        input.focus();
+        return;
+      }
+
+      if (!saveParticipantName(name)) {
+        error.textContent = 'Não foi possível salvar seu nome neste navegador.';
+        return;
+      }
+
+      window.location.href = 'passaporte.html';
+    });
+  </script>
+</body>
+</html>

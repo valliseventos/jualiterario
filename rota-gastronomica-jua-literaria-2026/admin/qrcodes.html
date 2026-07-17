@@ -140,6 +140,7 @@
           });
 
           if (requestedSlug && new URLSearchParams(window.location.search).get('print') === '1') {
+            document.title = '';
             setTimeout(function () { window.print(); }, 450);
           }
         })

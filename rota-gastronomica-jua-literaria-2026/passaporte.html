@@ -32,7 +32,7 @@
         </div>
         <img class="passport-profile-logo" src="assets/logo-jua-literaria.png" alt="Juá Literária">
         <div class="passport-profile-content">
-          <h1 class="passport-profile-name">Rota Gastronômica</h1>
+          <h1 class="passport-profile-name" id="participantDisplayName">Rota Gastronômica</h1>
           <span class="passport-profile-badge">Passaporte digital</span>
           <div class="passport-profile-progress">
             <div class="progress-header">
@@ -99,7 +99,16 @@
 
   <script src="app-state.js"></script>
   <script>
-    var ESTABELECIMENTOS = [];
+     if (!getParticipantName()) {
+       window.location.replace('cadastro.html');
+     }
+
+     var participantDisplayName = document.getElementById('participantDisplayName');
+     if (participantDisplayName && getParticipantName()) {
+       participantDisplayName.textContent = getParticipantName();
+     }
+
+     var ESTABELECIMENTOS = [];
 
     var COLOR_CYCLE = ['style-primary', 'style-secondary', 'style-tertiary'];
     var ROTATIONS = [-8, 6, -4, 10, -6, 8];
@@ -224,8 +233,11 @@
 
     async function generateStoryImage() {
       var button = document.getElementById('shareRouteButton');
-      var visits = getCurrentVisits().slice(0, 3);
-      var count = visits.length;
+      var allVisits = getCurrentVisits();
+      var visits = allVisits.slice(0, 3);
+      var visitedBySlug = {};
+      allVisits.forEach(function (visit) { visitedBySlug[visit.slug] = visit; });
+      var count = allVisits.length;
       var total = ESTABELECIMENTOS.length;
       var canvas = document.createElement('canvas');
       canvas.width = 1080;
@@ -236,95 +248,114 @@
       button.disabled = true;
       button.classList.add('is-loading');
 
-      ctx.fillStyle = '#f8f1e5';
+      ctx.fillStyle = '#eceae5';
       ctx.fillRect(0, 0, canvas.width, canvas.height);
-      ctx.fillStyle = '#cb2239';
-      ctx.fillRect(0, 0, canvas.width, 430);
-      ctx.fillStyle = '#1a2f7b';
-      ctx.fillRect(0, 1810, canvas.width, 110);
-
-      ctx.fillStyle = '#f0b116';
-      ctx.beginPath();
-      ctx.arc(930, 170, 120, 0, Math.PI * 2);
-      ctx.fill();
-
-      if (logo) {
-        var logoWidth = 330;
-        var logoHeight = logo.height * (logoWidth / logo.width);
-        ctx.drawImage(logo, (canvas.width - logoWidth) / 2, 78, logoWidth, logoHeight);
-      }
-
-      ctx.fillStyle = '#ffffff';
-      ctx.textAlign = 'center';
-      ctx.font = '800 58px Anybody, Arial, sans-serif';
-      ctx.fillText('MINHA ROTA', canvas.width / 2, 350);
-      ctx.font = '700 28px Arial, sans-serif';
-      ctx.fillText('JUÁ LITERÁRIA 2026', canvas.width / 2, 395);
-
       ctx.fillStyle = '#fffdf7';
-      roundRect(ctx, 70, 500, 940, 1130, 26);
+      roundRect(ctx, 12, 12, 1056, 1896, 28);
       ctx.fill();
-      ctx.strokeStyle = '#1a2f7b';
-      ctx.lineWidth = 6;
+      ctx.strokeStyle = '#d9d7d0';
+      ctx.lineWidth = 3;
       ctx.stroke();
 
-      ctx.fillStyle = '#1a2f7b';
-      ctx.textAlign = 'left';
-      ctx.font = '800 34px Anybody, Arial, sans-serif';
-      ctx.fillText('PASSAPORTE DIGITAL', 130, 610);
-      ctx.font = '400 25px Arial, sans-serif';
-      ctx.fillStyle = '#5e5b58';
-      ctx.fillText('Minha jornada pela Rota Gastronômica', 130, 660);
-
-      ctx.fillStyle = '#cb2239';
-      ctx.font = '800 104px Anybody, Arial, sans-serif';
-      ctx.fillText(String(count), 130, 825);
-      ctx.fillStyle = '#1a2f7b';
-      ctx.font = '700 38px Arial, sans-serif';
-      ctx.fillText('/ ' + total + ' SELOS', 285, 825);
-
-      ctx.fillStyle = '#5e5b58';
-      ctx.font = '600 25px Arial, sans-serif';
-      ctx.fillText('PROGRESSO DA ROTA', 130, 875);
-      ctx.fillStyle = '#f2eee3';
-      roundRect(ctx, 130, 915, 820, 26, 13);
-      ctx.fill();
-      ctx.fillStyle = '#cb2239';
-      roundRect(ctx, 130, 915, total ? Math.max(26, (count / total) * 820) : 0, 26, 13);
-      ctx.fill();
-
-      ctx.fillStyle = '#1a2f7b';
-      ctx.font = '800 31px Anybody, Arial, sans-serif';
-      ctx.fillText('ÚLTIMAS PARADAS', 130, 1060);
-
-      if (visits.length === 0) {
-        ctx.fillStyle = '#5e5b58';
-        ctx.font = '400 26px Arial, sans-serif';
-        drawWrappedText(ctx, 'Comece sua rota visitando um estabelecimento participante.', 130, 1140, 800, 40);
-      } else {
-        visits.forEach(function (visit, index) {
-          var y = 1160 + index * 135;
-          ctx.fillStyle = '#f0b116';
-          ctx.beginPath();
-          ctx.arc(160, y - 8, 28, 0, Math.PI * 2);
-          ctx.fill();
-          ctx.fillStyle = '#1a2f7b';
-          ctx.textAlign = 'center';
-          ctx.font = '800 24px Arial, sans-serif';
-          ctx.fillText(String(index + 1), 160, y);
-          ctx.textAlign = 'left';
-          ctx.font = '700 29px Anybody, Arial, sans-serif';
-          drawWrappedText(ctx, visit.name, 215, y - 8, 680, 36);
-          ctx.fillStyle = '#5e5b58';
-          ctx.font = '400 22px Arial, sans-serif';
-          ctx.fillText(visit.date || 'Visita registrada', 215, y + 42);
-        });
+      if (logo) {
+        var logoWidth = 430;
+        var logoHeight = logo.height * (logoWidth / logo.width);
+        ctx.drawImage(logo, (canvas.width - logoWidth) / 2, 70, logoWidth, logoHeight);
       }
 
       ctx.textAlign = 'center';
-      ctx.fillStyle = '#ffffff';
+      ctx.fillStyle = '#1a2f7b';
+      ctx.font = '700 28px Arial, sans-serif';
+      ctx.fillText('LENDA LITERÁRIA', canvas.width / 2, 515);
+      ctx.fillStyle = '#cb2239';
+      ctx.font = '800 48px Anybody, Arial, sans-serif';
+      ctx.fillText(getParticipantName().toUpperCase(), canvas.width / 2, 580);
+
+      ctx.fillStyle = '#1a1f3f';
+      ctx.font = '800 66px Anybody, Arial, sans-serif';
+      ctx.fillText(count + '/' + total + ' SABORES', canvas.width / 2, 735);
+      ctx.fillStyle = '#6f7ca8';
       ctx.font = '700 27px Arial, sans-serif';
-      ctx.fillText('ROTAS, SABORES E HISTÓRIAS DE JUAZEIRO', canvas.width / 2, 1875);
+      ctx.fillText((total ? Math.round((count / total) * 100) : 0) + '% CONCLUÍDO', canvas.width / 2, 780);
+
+      ctx.fillStyle = '#eef0f4';
+      ctx.fillRect(100, 830, 880, 14);
+      ctx.fillStyle = '#cb2239';
+      ctx.fillRect(100, 830, total ? (count / total) * 880 : 0, 14);
+
+      ctx.fillStyle = '#5e5b58';
+      ctx.font = '400 21px Arial, sans-serif';
+      var lastNames = visits.map(function (visit) { return visit.name.slice(0, 18); }).join('  ·  ');
+      if (lastNames) ctx.fillText('ÚLTIMAS PARADAS: ' + lastNames, canvas.width / 2, 895);
+
+      ctx.fillStyle = '#f8f1e5';
+      ctx.strokeStyle = '#6f7ca8';
+      ctx.lineWidth = 5;
+      ctx.setLineDash([12, 10]);
+      roundRect(ctx, 70, 960, 940, 170, 28);
+      ctx.fill();
+      ctx.stroke();
+      ctx.setLineDash([]);
+
+      ctx.textAlign = 'center';
+      ctx.fillStyle = '#5e5b58';
+      ctx.font = '400 25px Arial, sans-serif';
+      ctx.fillText('FAÇA SUA ROTA TAMBÉM!', canvas.width / 2, 1015);
+      ctx.fillStyle = '#596ab0';
+      roundRect(ctx, 300, 1040, 480, 58, 29);
+      ctx.fill();
+      ctx.fillStyle = '#ffffff';
+      ctx.font = '700 22px Arial, sans-serif';
+      ctx.fillText('↗  Link na Bio do @conduzzirbr', canvas.width / 2, 1077);
+
+      ctx.strokeStyle = '#d8dbe2';
+      ctx.lineWidth = 2;
+      ctx.beginPath();
+      ctx.moveTo(100, 1150);
+      ctx.lineTo(980, 1150);
+      ctx.stroke();
+
+      ctx.textAlign = 'left';
+      ctx.fillStyle = '#5e5b58';
+      ctx.font = '700 28px Arial, sans-serif';
+      ctx.fillText('COLEÇÃO', 70, 1210);
+
+      var gridX = 70;
+      var gridY = 1245;
+      var cellWidth = 218;
+      var cellHeight = 90;
+      var cellGap = 10;
+      var cellColors = ['#cb2239', '#6f7ca8', '#b69c55', '#cb2239'];
+
+      ESTABELECIMENTOS.forEach(function (est, index) {
+        var col = index % 4;
+        var row = Math.floor(index / 4);
+        var x = gridX + col * (cellWidth + cellGap);
+        var y = gridY + row * (cellHeight + cellGap);
+        var visit = visitedBySlug[est.slug];
+        var color = cellColors[col];
+
+        ctx.fillStyle = visit ? '#fffdf7' : '#f8f7f2';
+        ctx.strokeStyle = visit ? color : '#d8dbe2';
+        ctx.lineWidth = 3;
+        ctx.fillRect(x, y, cellWidth, cellHeight);
+        ctx.strokeRect(x, y, cellWidth, cellHeight);
+
+        if (visit) {
+          ctx.fillStyle = color;
+          ctx.font = '700 24px Arial, sans-serif';
+          ctx.textAlign = 'center';
+          ctx.fillText(est.category === 'Sobremesas' ? 'DOCE' : est.category.toUpperCase().slice(0, 8), x + cellWidth / 2, y + 34);
+          ctx.fillStyle = '#1a2f7b';
+          ctx.font = '700 20px Arial, sans-serif';
+          drawWrappedText(ctx, est.name.toUpperCase(), x + 14, y + 65, cellWidth - 28, 22);
+        }
+      });
+
+      ctx.fillStyle = '#1a2f7b';
+      ctx.textAlign = 'center';
+      ctx.font = '700 22px Arial, sans-serif';
+      ctx.fillText('@conduzzirbr  ·  Juazeiro/BA', canvas.width / 2, 1875);
 
       var blob = await canvasBlob(canvas);
       var file = new File([blob], 'minha-rota-jua-literaria.png', { type: 'image/png' });

@@ -1,4 +1,22 @@
 var STORAGE_KEY = 'rotas_visitas';
+var PARTICIPANT_NAME_KEY = 'rota_participante_nome';
+
+function getParticipantName() {
+  try {
+    return localStorage.getItem(PARTICIPANT_NAME_KEY) || '';
+  } catch (e) {
+    return '';
+  }
+}
+
+function saveParticipantName(name) {
+  try {
+    localStorage.setItem(PARTICIPANT_NAME_KEY, name.trim());
+    return true;
+  } catch (e) {
+    return false;
+  }
+}
 
 function getVisitas() {
   try {
