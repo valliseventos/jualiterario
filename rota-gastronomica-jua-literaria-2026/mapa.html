@@ -29,16 +29,6 @@
     <div id="map"></div>
 
     <div class="map-overlay">
-      <div class="search-box">
-        <div class="search-group">
-          <span class="material-symbols-outlined">search</span>
-          <input type="text" id="searchInput" placeholder="Buscar locais, pratos..." aria-label="Buscar estabelecimentos">
-          <button class="search-tune" aria-label="Filtrar">
-            <span class="material-symbols-outlined">tune</span>
-          </button>
-        </div>
-      </div>
-
       <div class="filter-row" id="filterRow">
         <button class="filter-chip is-active" data-filter="Todos">Todos</button>
         <button class="filter-chip" data-filter="Restaurante">
@@ -83,9 +73,9 @@
         <div class="sheet-items" id="sheetItems">
           <div id="sheetCards"></div>
           <div class="empty-state" id="emptyResult" style="display: none;">
-            <span class="material-symbols-outlined" style="font-size: 2rem; color: var(--color-text-soft);">search_off</span>
-            <p style="margin: 8px 0 0; font-weight: 600;">Nenhum estabelecimento encontrado</p>
-            <p style="margin: 4px 0 0; font-size: 0.85rem; color: var(--color-text-soft);">Tente outro termo ou limpe os filtros</p>
+             <span class="material-symbols-outlined" style="font-size: 2rem; color: var(--color-text-soft);">filter_alt_off</span>
+             <p style="margin: 8px 0 0; font-weight: 600;">Nenhum estabelecimento encontrado</p>
+             <p style="margin: 4px 0 0; font-size: 0.85rem; color: var(--color-text-soft);">Tente outra categoria</p>
           </div>
           <div class="loading-state" id="loadingState">
             <span class="material-symbols-outlined" style="font-size: 2rem; color: var(--color-text-soft);">search</span>
@@ -271,22 +261,16 @@
         });
       });
 
-      var searchInput = document.getElementById('searchInput');
-      searchInput.addEventListener('input', function () {
-        applyFilters(data);
-      });
     }
 
     function applyFilters(data) {
-      var query = document.getElementById('searchInput').value.toLowerCase().trim();
       var categoryFilter = activeFilter;
       var anyVisible = false;
 
       markerItems.forEach(function (item) {
         var est = item.data;
-        var searchMatch = query === '' || est.name.toLowerCase().includes(query) || est.specialDish.toLowerCase().includes(query);
         var catMatch = categoryFilter === 'Todos' || est.category === categoryFilter;
-        var visible = searchMatch && catMatch;
+        var visible = catMatch;
         item.marker.getElement().style.display = visible ? '' : 'none';
         if (visible) { anyVisible = true; }
       });
@@ -296,9 +280,8 @@
         var id = parseInt(card.getAttribute('data-id'));
         var est = data.find(function (e) { return e.id === id; });
         if (!est) return;
-        var searchMatch = query === '' || est.name.toLowerCase().includes(query) || est.specialDish.toLowerCase().includes(query);
         var catMatch = categoryFilter === 'Todos' || est.category === categoryFilter;
-        var visible = searchMatch && catMatch;
+        var visible = catMatch;
         card.style.display = visible ? '' : 'none';
       });
 

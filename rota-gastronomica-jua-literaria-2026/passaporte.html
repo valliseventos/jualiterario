@@ -44,13 +44,16 @@
             <div class="progress-track">
               <div class="progress-fill" id="progressFill" style="width: 0%;"></div>
             </div>
+            <button class="button button-primary share-route-button" id="shareRouteButton" type="button" disabled>
+              <span class="material-symbols-outlined button-icon">share</span>
+              Compartilhar rota
+            </button>
           </div>
         </div>
       </section>
 
       <section>
         <div class="section-heading" style="margin-bottom: 18px;">
-          <p class="section-label">Meus selos</p>
         </div>
         <div class="stamps-grid" id="stampsGrid">
           <div class="stamp-card" style="grid-column: 1 / -1; opacity: 0.6;">
@@ -164,11 +167,206 @@
       grid.innerHTML = html;
     }
 
+    function getCurrentVisits() {
+      var validSlugs = {};
+      ESTABELECIMENTOS.forEach(function (est) { validSlugs[est.slug] = true; });
+      return getVisitas()
+        .filter(function (visita) { return validSlugs[visita.slug]; })
+        .sort(function (a, b) { return a.timestamp < b.timestamp ? 1 : -1; });
+    }
+
+    function roundRect(ctx, x, y, width, height, radius) {
+      ctx.beginPath();
+      ctx.moveTo(x + radius, y);
+      ctx.arcTo(x + width, y, x + width, y + height, radius);
+      ctx.arcTo(x + width, y + height, x, y + height, radius);
+      ctx.arcTo(x, y + height, x, y, radius);
+      ctx.arcTo(x, y, x + width, y, radius);
+      ctx.closePath();
+    }
+
+    function drawWrappedText(ctx, text, x, y, maxWidth, lineHeight) {
+      var words = text.split(' ');
+      var line = '';
+      var lines = [];
+
+      words.forEach(function (word) {
+        var test = line ? line + ' ' + word : word;
+        if (ctx.measureText(test).width > maxWidth && line) {
+          lines.push(line);
+          line = word;
+        } else {
+          line = test;
+        }
+      });
+      if (line) lines.push(line);
+
+      lines.forEach(function (item, index) {
+        ctx.fillText(item, x, y + index * lineHeight);
+      });
+      return y + lines.length * lineHeight;
+    }
+
+    function loadStoryLogo() {
+      return new Promise(function (resolve) {
+        var image = new Image();
+        image.onload = function () { resolve(image); };
+        image.onerror = function () { resolve(null); };
+        image.src = 'assets/logo-jua-literaria.png';
+      });
+    }
+
+    function canvasBlob(canvas) {
+      return new Promise(function (resolve) {
+        canvas.toBlob(resolve, 'image/png');
+      });
+    }
+
+    async function generateStoryImage() {
+      var button = document.getElementById('shareRouteButton');
+      var visits = getCurrentVisits().slice(0, 3);
+      var count = visits.length;
+      var total = ESTABELECIMENTOS.length;
+      var canvas = document.createElement('canvas');
+      canvas.width = 1080;
+      canvas.height = 1920;
+      var ctx = canvas.getContext('2d');
+      var logo = await loadStoryLogo();
+
+      button.disabled = true;
+      button.classList.add('is-loading');
+
+      ctx.fillStyle = '#f8f1e5';
+      ctx.fillRect(0, 0, canvas.width, canvas.height);
+      ctx.fillStyle = '#cb2239';
+      ctx.fillRect(0, 0, canvas.width, 430);
+      ctx.fillStyle = '#1a2f7b';
+      ctx.fillRect(0, 1810, canvas.width, 110);
+
+      ctx.fillStyle = '#f0b116';
+      ctx.beginPath();
+      ctx.arc(930, 170, 120, 0, Math.PI * 2);
+      ctx.fill();
+
+      if (logo) {
+        var logoWidth = 330;
+        var logoHeight = logo.height * (logoWidth / logo.width);
+        ctx.drawImage(logo, (canvas.width - logoWidth) / 2, 78, logoWidth, logoHeight);
+      }
+
+      ctx.fillStyle = '#ffffff';
+      ctx.textAlign = 'center';
+      ctx.font = '800 58px Anybody, Arial, sans-serif';
+      ctx.fillText('MINHA ROTA', canvas.width / 2, 350);
+      ctx.font = '700 28px Arial, sans-serif';
+      ctx.fillText('JUÁ LITERÁRIA 2026', canvas.width / 2, 395);
+
+      ctx.fillStyle = '#fffdf7';
+      roundRect(ctx, 70, 500, 940, 1130, 26);
+      ctx.fill();
+      ctx.strokeStyle = '#1a2f7b';
+      ctx.lineWidth = 6;
+      ctx.stroke();
+
+      ctx.fillStyle = '#1a2f7b';
+      ctx.textAlign = 'left';
+      ctx.font = '800 34px Anybody, Arial, sans-serif';
+      ctx.fillText('PASSAPORTE DIGITAL', 130, 610);
+      ctx.font = '400 25px Arial, sans-serif';
+      ctx.fillStyle = '#5e5b58';
+      ctx.fillText('Minha jornada pela Rota Gastronômica', 130, 660);
+
+      ctx.fillStyle = '#cb2239';
+      ctx.font = '800 104px Anybody, Arial, sans-serif';
+      ctx.fillText(String(count), 130, 825);
+      ctx.fillStyle = '#1a2f7b';
+      ctx.font = '700 38px Arial, sans-serif';
+      ctx.fillText('/ ' + total + ' SELOS', 285, 825);
+
+      ctx.fillStyle = '#5e5b58';
+      ctx.font = '600 25px Arial, sans-serif';
+      ctx.fillText('PROGRESSO DA ROTA', 130, 875);
+      ctx.fillStyle = '#f2eee3';
+      roundRect(ctx, 130, 915, 820, 26, 13);
+      ctx.fill();
+      ctx.fillStyle = '#cb2239';
+      roundRect(ctx, 130, 915, total ? Math.max(26, (count / total) * 820) : 0, 26, 13);
+      ctx.fill();
+
+      ctx.fillStyle = '#1a2f7b';
+      ctx.font = '800 31px Anybody, Arial, sans-serif';
+      ctx.fillText('ÚLTIMAS PARADAS', 130, 1060);
+
+      if (visits.length === 0) {
+        ctx.fillStyle = '#5e5b58';
+        ctx.font = '400 26px Arial, sans-serif';
+        drawWrappedText(ctx, 'Comece sua rota visitando um estabelecimento participante.', 130, 1140, 800, 40);
+      } else {
+        visits.forEach(function (visit, index) {
+          var y = 1160 + index * 135;
+          ctx.fillStyle = '#f0b116';
+          ctx.beginPath();
+          ctx.arc(160, y - 8, 28, 0, Math.PI * 2);
+          ctx.fill();
+          ctx.fillStyle = '#1a2f7b';
+          ctx.textAlign = 'center';
+          ctx.font = '800 24px Arial, sans-serif';
+          ctx.fillText(String(index + 1), 160, y);
+          ctx.textAlign = 'left';
+          ctx.font = '700 29px Anybody, Arial, sans-serif';
+          drawWrappedText(ctx, visit.name, 215, y - 8, 680, 36);
+          ctx.fillStyle = '#5e5b58';
+          ctx.font = '400 22px Arial, sans-serif';
+          ctx.fillText(visit.date || 'Visita registrada', 215, y + 42);
+        });
+      }
+
+      ctx.textAlign = 'center';
+      ctx.fillStyle = '#ffffff';
+      ctx.font = '700 27px Arial, sans-serif';
+      ctx.fillText('ROTAS, SABORES E HISTÓRIAS DE JUAZEIRO', canvas.width / 2, 1875);
+
+      var blob = await canvasBlob(canvas);
+      var file = new File([blob], 'minha-rota-jua-literaria.png', { type: 'image/png' });
+      var canShare = navigator.share && (!navigator.canShare || navigator.canShare({ files: [file] }));
+
+      if (canShare) {
+        try {
+          await navigator.share({
+            title: 'Minha Rota Gastronômica Juá Literária',
+            text: 'Meu progresso na Rota Gastronômica Juá Literária',
+            files: [file]
+          });
+        } catch (error) {
+          if (error.name !== 'AbortError') downloadStoryImage(blob);
+        }
+      } else {
+        downloadStoryImage(blob);
+      }
+
+      button.disabled = false;
+      button.classList.remove('is-loading');
+    }
+
+    function downloadStoryImage(blob) {
+      var url = URL.createObjectURL(blob);
+      var link = document.createElement('a');
+      link.href = url;
+      link.download = 'minha-rota-jua-literaria.png';
+      document.body.appendChild(link);
+      link.click();
+      link.remove();
+      setTimeout(function () { URL.revokeObjectURL(url); }, 1000);
+    }
+
+    document.getElementById('shareRouteButton').addEventListener('click', generateStoryImage);
+
     fetch('data/estabelecimentos.json')
       .then(function (response) { return response.json(); })
       .then(function (data) {
         ESTABELECIMENTOS = data;
         renderPassport();
+        document.getElementById('shareRouteButton').disabled = false;
       });
   </script>
 </body>

@@ -18,6 +18,7 @@
         <a href="../mapa.html">Mapa</a>
         <a href="../restaurantes.html">Restaurantes</a>
         <a href="../passaporte.html">Passaporte</a>
+        <a href="qrcodes.html">QR codes</a>
       </nav>
     </div>
   </header>
@@ -43,7 +44,7 @@
     </div>
   </main>
 
-  <nav class="mobile-nav no-print" aria-label="Navegação inferior">
+  <nav class="mobile-nav standard-mobile-nav no-print" aria-label="Navegação inferior">
     <a href="../index.html">
       <span class="material-symbols-outlined nav-icon">home</span>
       Início
@@ -62,14 +63,7 @@
   <script>
     var ADMIN_PASSWORD = 'juazeiro2026';
 
-    var ESTABELECIMENTOS = [
-      {"id":1,"slug":"casa-da-orla","name":"Casa da Orla","category":"Restaurante","neighborhood":"Orla I"},
-      {"id":2,"slug":"cafe-da-ponte","name":"Cafe da Ponte","category":"Cafe","neighborhood":"Centro"},
-      {"id":3,"slug":"quintal-do-velho-chico","name":"Quintal do Velho Chico","category":"Bistro","neighborhood":"Orla II"},
-      {"id":4,"slug":"mercado-dos-sabores","name":"Mercado dos Sabores","category":"Cozinha rapida","neighborhood":"Centro"},
-      {"id":5,"slug":"varanda-do-sertao","name":"Varanda do Sertao","category":"Restaurante","neighborhood":"Santo Antonio"},
-      {"id":6,"slug":"atelier-doce","name":"Atelier Doce","category":"Sobremesas","neighborhood":"Centro"}
-    ];
+    var ESTABELECIMENTOS = [];
 
     function getCategoryIcon(cat) {
       var map = { 'Restaurante': 'restaurant', 'Cafe': 'local_cafe', 'Bistro': 'wine_bar', 'Cozinha rapida': 'fastfood', 'Sobremesas': 'cake' };
@@ -100,7 +94,9 @@
     function renderDashboard() {
       if (!checkAccess()) return;
 
-      var visitas = getVisitas();
+       var slugsAtuais = {};
+       ESTABELECIMENTOS.forEach(function (est) { slugsAtuais[est.slug] = true; });
+       var visitas = getVisitas().filter(function (visita) { return slugsAtuais[visita.slug]; });
       var totalEst = ESTABELECIMENTOS.length;
       var visitados = visitas.length;
       var progresso = totalEst > 0 ? Math.round((visitados / totalEst) * 100) : 0;
@@ -194,7 +190,16 @@
         '</div>';
     }
 
-    renderDashboard();
+    fetch('../data/estabelecimentos.json')
+      .then(function (response) { return response.json(); })
+      .then(function (data) {
+        ESTABELECIMENTOS = data;
+        renderDashboard();
+      })
+      .catch(function () {
+        document.getElementById('dashboardContent').innerHTML =
+          '<div class="empty-state"><span class="material-symbols-outlined" style="font-size: 2rem; color: var(--color-primary);">error_outline</span><p style="margin-top: 8px;">Não foi possível carregar os estabelecimentos.</p></div>';
+      });
   </script>
 </body>
 </html>

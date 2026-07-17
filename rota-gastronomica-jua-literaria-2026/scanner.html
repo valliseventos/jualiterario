@@ -62,9 +62,15 @@
 
       html5QrCode = new Html5Qrcode("qrReader");
 
+      var qrSize = Math.min(
+        Math.floor(window.innerWidth * 0.78),
+        Math.floor(window.innerHeight * 0.46),
+        320
+      );
+
       var config = {
         fps: 15,
-        qrbox: { width: 260, height: 260 },
+        qrbox: { width: qrSize, height: qrSize },
         aspectRatio: 1.0
       };
 

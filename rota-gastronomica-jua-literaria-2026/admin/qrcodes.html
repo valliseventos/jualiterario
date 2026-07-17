@@ -19,6 +19,7 @@
         <a href="../mapa.html">Mapa</a>
         <a href="../restaurantes.html">Restaurantes</a>
         <a href="../passaporte.html">Passaporte</a>
+        <a href="dashboard.html">Painel</a>
       </nav>
     </div>
   </header>
@@ -31,8 +32,8 @@
         <p class="admin-desc">Gere, imprima e recorte os QR codes para distribuir nos estabelecimentos participantes.</p>
         <p class="admin-note">
           <span class="material-symbols-outlined" style="font-size: 1rem; vertical-align: middle;">info</span>
-          URL base: <code id="baseUrlDisplay" style="background: var(--color-surface); padding: 2px 8px; border: 1px solid var(--color-secondary); font-size: 0.85rem;"></code>
-          — altere antes de imprimir se o domínio mudar.
+           Os códigos levam diretamente à validação da visita por QR Code. URL base: <code id="baseUrlDisplay" style="background: var(--color-surface); padding: 2px 8px; border: 1px solid var(--color-secondary); font-size: 0.85rem;"></code>
+           — altere antes de imprimir se o domínio mudar.
         </p>
         <div class="admin-actions">
           <button class="button button-primary" onclick="window.print()">
@@ -51,7 +52,7 @@
     </div>
   </main>
 
-  <nav class="mobile-nav no-print" aria-label="Navegação inferior">
+  <nav class="mobile-nav standard-mobile-nav no-print" aria-label="Navegação inferior">
     <a href="../index.html">
       <span class="material-symbols-outlined nav-icon">home</span>
       Início
@@ -68,6 +69,11 @@
 
   <script>
     var QR_BASE_URL = 'https://rotagastronomica.app/scan.html?slug=';
+    var requestedSlug = new URLSearchParams(window.location.search).get('slug');
+
+    if (requestedSlug) {
+      document.body.classList.add('qr-single');
+    }
 
     document.getElementById('baseUrlDisplay').textContent = QR_BASE_URL;
 
@@ -96,37 +102,46 @@
         .then(function (r) { return r.json(); })
         .then(function (data) {
           var grid = document.getElementById('qrGrid');
+          var establishments = requestedSlug
+            ? data.filter(function (est) { return est.slug === requestedSlug; })
+            : data;
           var html = '';
 
-          data.forEach(function (est) {
+          establishments.forEach(function (est) {
             var url = QR_BASE_URL + est.slug + '&qr=1';
             html +=
               '<div class="qr-card" data-slug="' + est.slug + '">' +
                 '<img class="qr-logo" src="../assets/logo-jua-literaria.png" alt="Juá Literária">' +
                 '<h3 class="qr-name">' + est.name + '</h3>' +
                 '<span class="qr-category">' + est.category + '</span>' +
-                '<p class="qr-instruction">Aponte a câmera do celular para este QR code</p>' +
-                '<div class="qr-canvas-wrap" id="qr-' + est.id + '"></div>' +
-                '<code class="qr-url">' + url + '</code>' +
-              '</div>';
+                 '<p class="qr-instruction">Aponte a câmera do celular para este QR code</p>' +
+                 '<div class="qr-canvas-wrap" id="qr-' + est.id + '"></div>' +
+                 '<button class="button button-secondary qr-print-button" onclick="printIndividual(\'' + est.slug + '\')">' +
+                   '<span class="material-symbols-outlined button-icon">print</span>Imprimir A4' +
+                 '</button>' +
+               '</div>';
           });
 
           grid.innerHTML = html;
 
-          data.forEach(function (est) {
+          establishments.forEach(function (est) {
             var url = QR_BASE_URL + est.slug + '&qr=1';
             var wrap = document.getElementById('qr-' + est.id);
             if (wrap && typeof QRCode !== 'undefined') {
               new QRCode(wrap, {
                 text: url,
-                width: 180,
-                height: 180,
+                width: requestedSlug ? 280 : 180,
+                height: requestedSlug ? 280 : 180,
                 colorDark: '#1a2f7b',
                 colorLight: '#ffffff',
                 correctLevel: QRCode.CorrectLevel.H
               });
             }
           });
+
+          if (requestedSlug && new URLSearchParams(window.location.search).get('print') === '1') {
+            setTimeout(function () { window.print(); }, 450);
+          }
         })
         .catch(function () {
           document.getElementById('qrGrid').innerHTML =
@@ -135,6 +150,10 @@
               '<p style="margin-top: 8px;">Erro ao carregar dados</p>' +
             '</div>';
         });
+    }
+
+    function printIndividual(slug) {
+      window.open('qrcodes.html?slug=' + encodeURIComponent(slug) + '&print=1', '_blank');
     }
 
     generateQRCodes();
